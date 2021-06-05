@@ -1,0 +1,50 @@
+import {BaseWrapper} from "./BaseWrapper";
+import {Memory} from "../memory/Memory";
+import {inMemory} from "../memory/inMemory";
+import {RoleType} from "../role/Role";
+
+@Memory("spirits")
+export class SpiritWrapper extends BaseWrapper<Spirit> {
+  @inMemory(() => RoleType.Free)
+  public role: RoleType;
+
+  @inMemory()
+  public task: number;
+
+  @inMemory()
+  public targetId: string;
+
+  // Aliases
+  public move(position: Position) {
+    this.entity.move(position);
+  }
+  public energize(target: Intractable) {
+    this.entity.energize(target);
+  }
+  public merge(target: Spirit) {
+    this.entity.merge(target);
+  }
+  public divide() {
+    this.entity.divide();
+  }
+  public isFull() {
+    return this.entity.energy === this.entity.energy_capacity;
+  }
+  public isEmpty() {
+    return this.entity.energy === 0;
+  }
+
+  // Operations
+  public checkAlive(): boolean {
+    if (this.entity.hp > 0) {
+      return true;
+    }
+    this.destroy();
+    return false;
+  }
+
+  // Misc
+  public static getInstanceById(id: string): SpiritWrapper {
+    return new this(spirits[id]);
+  }
+}
