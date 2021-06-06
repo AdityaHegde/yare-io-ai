@@ -1,14 +1,15 @@
 import {Task} from "./Task";
 import {StructureWrapper} from "../../wrappers/StructureWrapper";
 import {SpiritWrapper} from "../../wrappers/SpiritWrapper";
-import {EnergyWrapper} from "../../wrappers/EnergyWrapper";
+import {Log} from "../../utils/Logger";
 
+@Log
 export class BasicDischargeTask extends Task<Base, StructureWrapper> {
-  protected processSpiritCore(spirit: SpiritWrapper, target: EnergyWrapper): boolean {
-    if (spirit.isEmpty()) {
-      return false;
-    }
-    spirit.energize(spirit.entity);
-    return true;
+  protected processSpiritCore(spirit: SpiritWrapper, target: SpiritWrapper | StructureWrapper) {
+    spirit.energize(target.entity);
+  }
+
+  protected taskIsComplete(spirit: SpiritWrapper, target: SpiritWrapper | StructureWrapper): boolean {
+    return spirit.isEmpty();
   }
 }

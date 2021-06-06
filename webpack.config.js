@@ -1,13 +1,15 @@
 const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports = {
-  mode: "production",
+  mode: "development",
+  devtool: "source-map",
   entry: [
-    "./src/index.ts",
+    "./test/functional/index.tsx",
   ],
   resolve: {
-    extensions: [".ts", ".js"],
+    extensions: [".ts", ".tsx", ".js", ".jsx"],
   },
 
   module: {
@@ -23,6 +25,9 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin({
       cleanStaleWebpackAssets: false,
+    }),
+    new HtmlWebpackPlugin({
+      title: "Test UI",
     }),
   ],
 

@@ -4,15 +4,36 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npx webpack"
+    "build": "npx rollup -c rollup.config.js --intro '(() => {' --outro '})()'",
+    "build-test": "npx webpack"
+  },
+  "mocha": {
+    "require": [
+      "ts-node/register"
+    ]
   },
   "author": "adityahegderocks@gmail.com",
   "license": "ISC",
   "devDependencies": {
+    "@rollup/stream": "^2.0.0",
+    "@types/mocha": "^8.2.2",
+    "@types/node": "^14.17.2",
+    "@types/react": "^17.0.9",
+    "@types/react-dom": "^17.0.6",
     "@typescript-eslint/eslint-plugin": "^4.26.0",
     "@typescript-eslint/parser": "^4.26.0",
     "clean-webpack-plugin": "^4.0.0-alpha.0",
+    "eslint": "^7.28.0",
+    "html-webpack-plugin": "^5.3.1",
+    "mocha": "^8.4.0",
+    "pixi.js": "^6.0.4",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "rollup": "^2.50.6",
+    "rollup-plugin-typescript2": "^0.30.0",
+    "sinon": "^11.1.1",
     "ts-loader": "^9.2.2",
+    "ts-node": "^10.0.0",
     "tslint": "^6.1.3",
     "typescript": "^4.3.2",
     "webpack": "^5.38.1",

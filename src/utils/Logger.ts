@@ -6,7 +6,7 @@ export class Logger {
   }
 
   log(...messages: Array<any>) {
-    console.log(`[${this.label}]`, ...messages);
+    console.log(`[${this.label}] ${messages.join(" ")}`);
   }
 
   logJSON(json: any) {

@@ -1,7 +1,7 @@
-import {EnergyTargetPool} from "../target/EnergyTargetPool";
-import {EnergyStorageTargetPool} from "../target/EnergyStorageTargetPool";
-import {EnemyBaseTargetPool} from "../target/EnemyBaseTargetPool";
-import {EnemySpiritTargetPool} from "../target/EnemySpiritTargetPool";
+import {EnergyTargetPool} from "../role/target/EnergyTargetPool";
+import {EnergyStorageTargetPool} from "../role/target/EnergyStorageTargetPool";
+import {EnemyBaseTargetPool} from "../role/target/EnemyBaseTargetPool";
+import {EnemySpiritTargetPool} from "../role/target/EnemySpiritTargetPool";
 import {Role, RoleType} from "../role/Role";
 import {BaseClass} from "../BaseClass";
 import {BaseWrapper} from "../wrappers/BaseWrapper";
@@ -10,21 +10,24 @@ import {TaskType} from "../role/task/Task";
 import {BasicChargeTask} from "../role/task/BasicChargeTask";
 import {BasicDischargeTask} from "../role/task/BasicDischargeTask";
 import {Runner} from "../runner/Runner";
+import {TargetPoolType} from "../role/target/TargetPool";
 
 export const globals: {
   targetPools?: {
-    "Energy": EnergyTargetPool;
-    "EnergyStorage": EnergyStorageTargetPool;
-    "EnemyBase": EnemyBaseTargetPool;
-    "EnemySpirit": EnemySpiritTargetPool;
+    [TargetPoolType.Energy]: EnergyTargetPool;
+    [TargetPoolType.EnergyStorage]: EnergyStorageTargetPool;
+    [TargetPoolType.EnemyBase]: EnemyBaseTargetPool;
+    [TargetPoolType.EnemySpirit]: EnemySpiritTargetPool;
   };
   tasks?: {
     [TaskType.BasicCharge]: BasicChargeTask,
     [TaskType.BasicStore]: BasicDischargeTask,
+    [TaskType.BasicBaseDefend]: BasicDischargeTask,
     [TaskType.BasicBaseAttack]: BasicDischargeTask,
   };
   roles?: {
     [RoleType.BasicHarvester]: Role,
+    [RoleType.BasicDefender]: Role,
     [RoleType.BasicAttacker]: Role,
   };
   assigner?: RoleAssigner;
@@ -36,12 +39,12 @@ export const globals: {
 
 export function addInstanceToGlobal<T extends BaseClass>(instance: T): T {
   const BaseClazz: typeof BaseClass = instance.constructor as typeof BaseClass;
-  if (!this.globals.instances[BaseClazz.memoryName]) {
-    this.globals.instances[BaseClazz.memoryName] = {};
+  if (!globals.instances[BaseClazz.memoryName]) {
+    globals.instances[BaseClazz.memoryName] = {};
   }
 
-  if (!this.globals.instances[BaseClazz.memoryName][instance.id]) {
-    this.globals.instances[BaseClazz.memoryName][instance.id] = instance;
+  if (!globals.instances[BaseClazz.memoryName][instance.id]) {
+    globals.instances[BaseClazz.memoryName][instance.id] = instance;
   }
 
   return instance;

@@ -8,10 +8,10 @@ export class SpiritWrapper extends BaseWrapper<Spirit> {
   @inMemory(() => RoleType.Free)
   public role: RoleType;
 
-  @inMemory()
+  @inMemory(() => 0)
   public task: number;
 
-  @inMemory()
+  @inMemory(() => "")
   public targetId: string;
 
   // Aliases
@@ -42,6 +42,10 @@ export class SpiritWrapper extends BaseWrapper<Spirit> {
     this.destroy();
     return false;
   }
+
+  // public getEnemyInRange(): Spirit {
+  //   return this.entity.sight.enemies.find(enenmy => enenmy.)
+  // }
 
   // Misc
   public static getInstanceById(id: string): SpiritWrapper {

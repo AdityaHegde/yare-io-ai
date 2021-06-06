@@ -1,11 +1,3 @@
-import {initMemory} from "./globals/initMemory";
-import {initGlobals} from "./globals/initGlobals";
-import {globals} from "./globals/globals";
+import {runLoop} from "./runLoop";
 
-initGlobals();
-
-if (!memory.init) {
-  initMemory();
-}
-
-globals.runner.run();
+runLoop();

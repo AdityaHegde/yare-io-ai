@@ -16,7 +16,7 @@ export class MemorySet<T, K = string> extends Set<T> {
     this.deserializer = deserializer;
 
     this.memory.forEach((memoryEntry) => {
-      super.add(this.deserializer(memoryEntry));
+      this.addToSuper(this.deserializer(memoryEntry), memoryEntry);
     });
   }
 
@@ -26,10 +26,7 @@ export class MemorySet<T, K = string> extends Set<T> {
 
   public add(value: T) {
     if (!this.has(value)) {
-      super.add(value);
-      const memoryEntry = this.serializer(value);
-      this.map.set(memoryEntry, value);
-      this.memory.push(memoryEntry);
+      this.memory.push(this.addToSuper(value));
     }
     return this;
   }
@@ -55,5 +52,11 @@ export class MemorySet<T, K = string> extends Set<T> {
 
   public get(memoryEntry: K): T {
     return this.map.get(memoryEntry);
+  }
+
+  private addToSuper(value: T, memoryEntry = this.serializer(value)) {
+    super.add(value);
+    this.map.set(memoryEntry, value);
+    return memoryEntry;
   }
 }

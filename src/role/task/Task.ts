@@ -1,13 +1,13 @@
 import {BaseClass} from "../../BaseClass";
-import {TargetPool} from "../../target/TargetPool";
+import {TargetPool} from "../target/TargetPool";
 import {BaseWrapper} from "../../wrappers/BaseWrapper";
 import {SpiritWrapper} from "../../wrappers/SpiritWrapper";
-import {getDistance} from "../../utils/getDistance";
-import {DISTANCE} from "../../constants";
+import {isWithinRange} from "../../utils/getDistance";
 
 export enum TaskType {
   BasicCharge,
   BasicStore,
+  BasicBaseDefend,
   BasicBaseAttack,
 }
 
@@ -28,35 +28,42 @@ export class Task<EntityType extends Intractable, WrapperType extends BaseWrappe
   }
 
   public processSpirit(spirit: SpiritWrapper): boolean {
+    let target;
+
     if (!spirit.targetId) {
       if (!this.targetPool.hasTargets()) {
-        return false;
+        return true;
       }
 
-      spirit.targetId = this.targetPool.getNextTarget();
+      target = this.targetPool.getNextTarget();
+      spirit.targetId = target.entity.id;
+    } else {
+      target = this.targetPool.targets.get(spirit.targetId);
     }
 
-    const target = this.targetPool.targets.get(spirit.targetId);
+    // this.logger.log(`spirit.targetId=${spirit.targetId} target.entity.id=${target?.entity?.id}`);
 
     if (!target) {
-      spirit.targetId = null;
+      spirit.targetId = "";
       return false;
     }
 
-    if (getDistance(spirit.entity, target.entity) <= DISTANCE) {
-      const done = this.processSpiritCore(spirit, target);
-      if (done && this.clearTarget) {
-        spirit.targetId = null;
-      }
-      return done;
+    // this.logger.log(`source=${JSON.stringify(spirit.entity.position)} target=${JSON.stringify(target.entity.position)}`);
+    if (this.taskIsComplete(spirit, target)) {
+      return true;
+    }
+    if (isWithinRange(spirit.entity, target.entity)) {
+      this.processSpiritCore(spirit, target);
     } else {
       spirit.move(target.entity.position);
     }
 
-    return false;
+    return this.taskIsComplete(spirit, target);
   }
 
-  protected processSpiritCore(spirit: SpiritWrapper, target: WrapperType): boolean {
+  protected processSpiritCore(spirit: SpiritWrapper, target: WrapperType) {}
+
+  protected taskIsComplete(spirit: SpiritWrapper, target: WrapperType): boolean {
     return false;
   }
 }
