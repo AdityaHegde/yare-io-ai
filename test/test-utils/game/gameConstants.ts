@@ -1,0 +1,2 @@
+export const ORIGINAL_DISTANCE = 200 * 200;
+export const ORIGINAL_VISUAL_DISTANCE = 400 * 400;

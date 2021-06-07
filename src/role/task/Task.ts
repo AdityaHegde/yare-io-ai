@@ -2,7 +2,7 @@ import {BaseClass} from "../../BaseClass";
 import {TargetPool} from "../target/TargetPool";
 import {BaseWrapper} from "../../wrappers/BaseWrapper";
 import {SpiritWrapper} from "../../wrappers/SpiritWrapper";
-import {isWithinRange} from "../../utils/getDistance";
+import {isWithinRange} from "../../utils/GridUtils";
 
 export enum TaskType {
   BasicCharge,

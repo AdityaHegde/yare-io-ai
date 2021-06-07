@@ -5,12 +5,15 @@ import {EnemySpiritTargetPool} from "../role/target/EnemySpiritTargetPool";
 import {Role, RoleType} from "../role/Role";
 import {BaseClass} from "../BaseClass";
 import {BaseWrapper} from "../wrappers/BaseWrapper";
-import {RoleAssigner} from "../role/RoleAssigner";
+import {RoleAssigner} from "../runner/assigner/RoleAssigner";
 import {TaskType} from "../role/task/Task";
 import {BasicChargeTask} from "../role/task/BasicChargeTask";
 import {BasicDischargeTask} from "../role/task/BasicDischargeTask";
 import {Runner} from "../runner/Runner";
 import {TargetPoolType} from "../role/target/TargetPool";
+import {SpiritWrapper} from "../wrappers/SpiritWrapper";
+import {SpiritGroup} from "../group/SpiritGroup";
+import {GroupAssigner} from "../runner/assigner/GroupAssigner";
 
 export const globals: {
   targetPools?: {
@@ -30,8 +33,11 @@ export const globals: {
     [RoleType.BasicDefender]: Role,
     [RoleType.BasicAttacker]: Role,
   };
-  assigner?: RoleAssigner;
+  roleAssigner?: RoleAssigner;
+  groups?: Array<SpiritGroup>;
+  groupAssigner?: GroupAssigner;
   runner?: Runner;
+  base_star?: Energy;
   instances: Record<string, Record<string, BaseClass>>;
 } = {
   instances: {},
@@ -58,4 +64,8 @@ export function getWrapperInstance<EntityType extends Intractable>(
   BaseWrapperClazz: typeof BaseWrapper, entity: EntityType,
 ): BaseWrapper<EntityType> {
   return addInstanceToGlobal(BaseWrapperClazz.getInstanceByEntity(entity)) as BaseWrapper<EntityType>;
+}
+
+export function getSpiritWrapper(spiritId: string): SpiritWrapper {
+  return getWrapperInstance(SpiritWrapper as any, spirits[spiritId]) as SpiritWrapper;
 }

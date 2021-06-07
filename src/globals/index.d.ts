@@ -34,7 +34,7 @@ interface Spirit extends Common {
   divide: () => void;
 }
 
-declare const spirits: { [key: string]: Spirit };
+declare const spirits: Record<string, Spirit>;
 declare const my_spirits: Spirit[];
 declare const base: Base;
 declare const enemy_base: Base;
@@ -43,5 +43,6 @@ declare const star_a1c: Energy;
 declare const memory: {
   init: boolean;
   ids: Record<string, number>;
+  base_star: string;
+  started: boolean;
 } & Record<string, any>;
-

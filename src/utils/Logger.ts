@@ -9,6 +9,10 @@ export class Logger {
     console.log(`[${this.label}] ${messages.join(" ")}`);
   }
 
+  error(error: Error) {
+    console.log(error);
+  }
+
   logJSON(json: any) {
     console.log(JSON.stringify(json));
   }

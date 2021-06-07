@@ -1,7 +1,6 @@
 import {Player} from "../Player";
 import {SpiritImpl} from "./SpiritImpl";
-import {getDistance, isWithinRange} from "../../../../src/utils/getDistance";
-import {SIGHT_RANGE} from "../../../../src/constants";
+import {getBlankSight} from "../utils";
 
 const SPIRIT_COST = 50;
 
@@ -12,12 +11,10 @@ export class BaseImpl implements Base {
   public energy_capacity: number;
   public size = 40;
   public position: Position;
-  public sight: Sight = {
-    enemies: [],
-    friends: [],
-    structures: [],
-  };
+  public sight = getBlankSight();
   public structure_type = "base";
+
+  public underAttack = false;
 
   public owner: Player;
 
@@ -41,6 +38,10 @@ export class BaseImpl implements Base {
   }
 
   public createSpiritIfEnoughEnergy() {
+    if (this.underAttack) {
+      return;
+    }
+
     while (this.energy >= SPIRIT_COST) {
       this.owner.addNewSpirit(this.createSpirit([
         this.position[0] + 5,
@@ -50,17 +51,15 @@ export class BaseImpl implements Base {
     }
   }
 
-  public enemySpiritMoved(spirit: SpiritImpl) {
-    const idx = this.sight.enemies.indexOf(spirit.id);
+  public resetSight() {
+    this.sight = getBlankSight();
+  }
 
-    if (isWithinRange(this, spirit, SIGHT_RANGE)) {
-      if (idx === -1) {
-        this.sight.enemies.push(spirit.id);
-      }
+  public addSpiritToSight(spiritImpl: SpiritImpl) {
+    if (this.owner === spiritImpl.owner) {
+      this.sight.friends.push(spiritImpl.id);
     } else {
-      if (idx >= 0) {
-        this.sight.enemies.splice(idx, 1);
-      }
+      this.sight.enemies.push(spiritImpl.id);
     }
   }
 }

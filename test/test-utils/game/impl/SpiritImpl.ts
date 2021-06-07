@@ -1,12 +1,9 @@
 import {Player} from "../Player";
-import {isWithinRange} from "../../../../src/utils/getDistance";
-import {MOVE_DISTANCE} from "../../../../src/constants";
 import {Logger} from "ts-loader/dist/logger";
 import {Log} from "../../../../src/utils/Logger";
-import {moveAlongPoint} from "../../Grid";
-import {BaseImpl} from "./BaseImpl";
-
-const ORIGINAL_DISTANCE = 200 * 200;
+import {SpiritMoveEvent} from "../events/SpiritMoveEvent";
+import {SpiritEnergizeEvent} from "../events/SpiritEnergizeEvent";
+import {getBlankSight} from "../utils";
 
 @Log
 export class SpiritImpl implements Spirit {
@@ -16,7 +13,7 @@ export class SpiritImpl implements Spirit {
   public energy_capacity: number;
   public size: number;
   public position: Position;
-  public sight: Sight;
+  public sight = getBlankSight();
 
   public owner: Player;
 
@@ -34,54 +31,34 @@ export class SpiritImpl implements Spirit {
     this.owner = owner;
   }
 
-  public divide(): void {
+  public move(position: Position): void {
+    this.owner.game.gameEventLoop.addEvent(new SpiritMoveEvent(this, position));
   }
 
   public energize(target: Intractable): void {
-    if (target === this) {
-      let star: Energy;
-      if (isWithinRange(this, this.owner.game.star_a1c, ORIGINAL_DISTANCE)) {
-        star = this.owner.game.star_a1c;
-      } else if (isWithinRange(this, this.owner.game.star_zxq, ORIGINAL_DISTANCE)) {
-        star = this.owner.game.star_zxq;
-      }
-      if (!star) {
-        return;
-      }
-      this.energy = Math.min(this.energy + this.size, this.energy_capacity);
-      return;
-    }
-
-    if (!isWithinRange(this, target, ORIGINAL_DISTANCE) || this.energy === 0) {
-      return;
-    }
-
-    const targetOwner = (target as any).owner;
-    const energyEntity: EnergyEntity = target as any;
-    if (!energyEntity.energy_capacity) {
-      return;
-    }
-
-    const transferEnergy = Math.min(this.size, this.energy);
-
-    if (targetOwner === this.owner) {
-      energyEntity.energy = Math.min(energyEntity.energy + transferEnergy, energyEntity.energy_capacity);
-    } else {
-      if (energyEntity.energy > 0) {
-        energyEntity.energy = Math.max(energyEntity.energy - 2 * transferEnergy, 0);
-      } else {
-        energyEntity.hp = Math.max(0, energyEntity.hp - transferEnergy);
-      }
-    }
-
-    this.energy -= transferEnergy;
+    this.owner.game.gameEventLoop.addEvent(new SpiritEnergizeEvent(this, target));
   }
 
   public merge(target: Spirit): void {
   }
 
-  public move(position: Position): void {
-    this.position = moveAlongPoint(this.position, position, MOVE_DISTANCE);
-    (enemy_base as BaseImpl).enemySpiritMoved(this);
+  public divide(): void {
+  }
+
+  public resetSight() {
+    this.sight = getBlankSight();
+  }
+
+  public addSpiritToSight(spiritImpl: SpiritImpl) {
+    this.updateSightWithSpirit(spiritImpl);
+    spiritImpl.updateSightWithSpirit(this);
+  }
+
+  public updateSightWithSpirit(spiritImpl: SpiritImpl) {
+    if (this.owner === spiritImpl.owner) {
+      this.sight.friends.push(spiritImpl.id);
+    } else {
+      this.sight.enemies.push(spiritImpl.id);
+    }
   }
 }

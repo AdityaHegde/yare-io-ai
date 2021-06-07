@@ -21,11 +21,11 @@ export class Player extends EventEmitter {
 
   public bootstrapData(index: number) {
     this.base = new BaseImpl(`base_${this.name}`, 200,
-      [1000 + 1000 * index, 500 + 1000 * index], this);
+      [1600 + 1200 * index, 700 + 1000 * index], this);
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 7; i++) {
       this.addNewSpirit(this.base.createSpirit(
-        [500 + i * 50 + 1000 * index, 250 + 1000 * index],
+        [1500 + i * 50 + 1200 * index, 500 + 1000 * index],
       ));
     }
   }

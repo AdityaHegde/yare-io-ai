@@ -31,7 +31,7 @@ export class SpiritWrapper extends BaseWrapper<Spirit> {
     return this.entity.energy === this.entity.energy_capacity;
   }
   public isEmpty() {
-    return this.entity.energy === 0;
+    return this.entity.energy <= 0;
   }
 
   // Operations

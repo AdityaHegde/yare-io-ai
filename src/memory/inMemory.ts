@@ -12,9 +12,9 @@ export function inMemory<T>(
 
     descriptor.get = function() {
       // if the property is not defined in cache yet, get it from memory
-      if (!this[_fieldName]) {
+      if (!(_fieldName in this)) {
         // if the property is not present in the memory either, use the getter function passed to get the value and store in memory
-        if (!this.memory[fieldName]) {
+        if (!(fieldName in this.memory)) {
           this[_fieldName] = getter.call(this);
           this.memory[fieldName] = this[_fieldName] && serializer.call(this, this[_fieldName]);
         } else {
@@ -27,9 +27,7 @@ export function inMemory<T>(
 
     descriptor.set = function(value: T) {
       // save the serialized value to memory and value to cache
-      if (value !== null && value !== undefined) {
-        this.memory[fieldName] = serializer.call(this, value);
-      }
+      this.memory[fieldName] = serializer.call(this, value);
       this[_fieldName] = value;
     };
 

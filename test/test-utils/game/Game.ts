@@ -1,6 +1,8 @@
 import {Player} from "./Player";
 import {EnergyImpl} from "./impl/EnergyImpl";
 import {SpiritImpl} from "./impl/SpiritImpl";
+import {GameEventLoop} from "./events/GameEventLoop";
+import {Grid} from "./Grid";
 
 export class Game {
   public players: Array<Player>;
@@ -8,10 +10,16 @@ export class Game {
   public star_a1c: EnergyImpl;
 
   public spirits: {
-    [k in string]: Spirit
+    [k in string]: SpiritImpl
   } = {};
 
+  public gameEventLoop: GameEventLoop;
+
+  public grid: Grid;
+
   constructor() {
+    this.gameEventLoop = new GameEventLoop(this);
+    this.grid = new Grid(this);
     this.players = [
       new Player("one", this),
       new Player("two", this),
@@ -19,8 +27,8 @@ export class Game {
   }
 
   public init() {
-    this.star_zxq = new EnergyImpl("star_zxq", [500, 750]);
-    this.star_a1c = new EnergyImpl("star_a1c", [1500, 1750]);
+    this.star_zxq = new EnergyImpl("star_zxq", [1000, 1000]);
+    this.star_a1c = new EnergyImpl("star_a1c", [3400, 1400]);
 
     this.players.forEach((player, index) => {
       player.bootstrapData(index);

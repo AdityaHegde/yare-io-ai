@@ -6,13 +6,19 @@ import {TaskType} from "../role/task/Task";
 import {BasicChargeTask} from "../role/task/BasicChargeTask";
 import {BasicDischargeTask} from "../role/task/BasicDischargeTask";
 import {Role, RoleType} from "../role/Role";
-import {RoleAssigner} from "../role/RoleAssigner";
 import {addInstanceToGlobal, globals} from "./globals";
-import {Runner} from "../runner/Runner";
 import {TargetPoolType} from "../role/target/TargetPool";
 import {MAX_DEFENDERS, MAX_HARVESTERS} from "../constants";
+import {InitialGroup} from "../group/InitialGroup";
+import {HarvestChain} from "../group/HarvestChain";
+import {GroupAssigner} from "../runner/assigner/GroupAssigner";
+import {GroupRunner} from "../runner/GroupRunner";
+import {SentryLine} from "../group/SentryLine";
+import {DefenceArmy} from "../group/DefenceArmy";
 
 export function initGlobals() {
+  initBaseStar();
+
   globals.targetPools = {
     [TargetPoolType.Energy]: addInstanceToGlobal(new EnergyTargetPool(`${TargetPoolType.Energy}`)),
     [TargetPoolType.EnergyStorage]: addInstanceToGlobal(new EnergyStorageTargetPool(`${TargetPoolType.EnergyStorage}`)),
@@ -55,9 +61,21 @@ export function initGlobals() {
       tasks: [globals.tasks[TaskType.BasicCharge], globals.tasks[TaskType.BasicBaseAttack]],
       maxSpirits: -1,
     })),
-  }
+  };
 
-  globals.assigner = addInstanceToGlobal(new RoleAssigner("one"));
+  globals.groups = [
+    new InitialGroup("init", {maxSpirits: -1}),
+    new HarvestChain("chain"),
+    new SentryLine("sentry"),
+    new DefenceArmy("defence", {maxSpirits: -1}),
+  ];
 
-  globals.runner = addInstanceToGlobal(new Runner("one"));
+  globals.runner = addInstanceToGlobal(new GroupRunner("one", new GroupAssigner("group")));
+}
+
+export function initBaseStar() {
+  globals.base_star = {
+    "star_zxq": star_zxq,
+    "star_a1c": star_a1c,
+  }[memory.base_star];
 }
