@@ -9,10 +9,6 @@ import {SingleGroup} from "./SingleGroup";
  */
 @Log
 export class InitialGroup extends SingleGroup {
-  public init() {
-    my_spirits.forEach(spirit => this.addSpirit(getSpiritWrapper(spirit.id)));
-  }
-
   public run() {
     this.spiritIds.forEach((spiritId) => {
       const spiritWrapper = getSpiritWrapper(spiritId);

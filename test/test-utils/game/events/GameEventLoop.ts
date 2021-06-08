@@ -5,6 +5,7 @@ export class GameEventLoop {
   public readonly game: Game;
 
   public gameEvents = new Array<GameEvent>();
+  public
 
   constructor(game: Game) {
     this.game = game;

@@ -2,45 +2,83 @@ import {SpiritWrapper} from "../../wrappers/SpiritWrapper";
 import {globals} from "../../globals/globals";
 import {Assigner} from "./Assigner";
 import {Log} from "../../utils/Logger";
-import {SpiritGroup} from "../../group/SpiritGroup";
+import {SpiritGroup, SpiritGroupType} from "../../group/SpiritGroup";
 import {InitialGroup} from "../../group/InitialGroup";
 import {HarvestChain} from "../../group/HarvestChain";
 import {SentryLine} from "../../group/SentryLine";
-import {DefenceArmy} from "../../group/DefenceArmy";
-
-const SENTRY_ACTIVATION_POINT = 10;
+import {PatrolArmy} from "../../group/PatrolArmy";
+import {HARVESTER_DEFENDER_RATIO, SENTRY_ACTIVATION_POINT} from "../../constants";
 
 @Log
 export class GroupAssigner extends Assigner {
-  private readonly initialGroup: InitialGroup;
-  private readonly harvesterGroup: HarvestChain;
-  private readonly sentryLine: SentryLine;
-  private readonly defenceArmy: DefenceArmy;
-
-  constructor(id: string) {
-    super(id);
-
-    this.initialGroup = globals.groups[0] as InitialGroup;
-    this.harvesterGroup = globals.groups[1] as HarvestChain;
-    this.sentryLine = globals.groups[2] as SentryLine;
-    this.defenceArmy = globals.groups[3] as DefenceArmy;
+  public preTick() {
+    this.reassignToDefence();
   }
 
   public assign(spiritWrapper: SpiritWrapper) {
-    let selectedGroup: SpiritGroup;
+    // const initialGroup = globals.groups[SpiritGroupType.InitialGroup];
+    const harvesterGroup = globals.groups[SpiritGroupType.HarvestChain];
+    const sentryLine = globals.groups[SpiritGroupType.SentryLine];
+    const baseDefenceArmy = globals.groups[SpiritGroupType.BaseDefenceArmy];
 
-    if (spiritWrapper.isFull()) {
-      selectedGroup = this.initialGroup;
-    } else {
-      if (this.harvesterGroup.totalSpiritCount >= SENTRY_ACTIVATION_POINT && this.sentryLine.hasSpace()) {
-        selectedGroup = this.sentryLine;
-      } else {
-        selectedGroup = this.harvesterGroup;
-      }
+    // if (spiritWrapper.freshSpirit) {
+    //   this.assignSpiritToGroup(spiritWrapper, initialGroup);
+    //   return;
+    // }
+
+    // sentry line would be killed if there is an attack
+    // do not assign until attack has been cleared
+    if (!memory.underAttack && harvesterGroup.totalSpiritCount >= SENTRY_ACTIVATION_POINT &&
+        sentryLine.hasSpace()) {
+      this.assignSpiritToGroup(spiritWrapper, sentryLine);
+      return;
     }
 
-    if (selectedGroup) {
-      selectedGroup.addSpirit(spiritWrapper);
+    if (memory.underAttack && (baseDefenceArmy.totalSpiritCount === 0 ||
+        harvesterGroup.totalSpiritCount / baseDefenceArmy.totalSpiritCount > HARVESTER_DEFENDER_RATIO)) {
+      this.assignSpiritToGroup(spiritWrapper, baseDefenceArmy);
+      return;
     }
+
+    this.assignSpiritToGroup(spiritWrapper, harvesterGroup);
+  }
+
+  public postTick() {
+    this.reassignToAttack();
+  }
+
+  private reassignToDefence() {
+    if (!memory.underAttack || globals.groups[SpiritGroupType.HarvestChain].totalSpiritCount <=
+        globals.groups[SpiritGroupType.BaseDefenceArmy].totalSpiritCount * HARVESTER_DEFENDER_RATIO) {
+      return;
+    }
+
+    this.reassignFromGroup(
+      globals.groups[SpiritGroupType.HarvestChain],
+      globals.groups[SpiritGroupType.BaseDefenceArmy],
+      globals.groups[SpiritGroupType.HarvestChain].totalSpiritCount -
+        globals.groups[SpiritGroupType.BaseDefenceArmy].totalSpiritCount * HARVESTER_DEFENDER_RATIO,
+    );
+  }
+
+  private assignSpiritToGroup(spiritWrapper: SpiritWrapper, selectedGroup: SpiritGroup) {
+    // this.logger.log(`${spiritWrapper.id} assigned to ${selectedGroup.id}`);
+    selectedGroup.addSpirit(spiritWrapper);
+  }
+
+  private reassignToAttack() {
+    if (memory.underAttack || globals.groups[SpiritGroupType.BaseDefenceArmy].totalSpiritCount === 0) {
+      return;
+    }
+
+    this.reassignFromGroup(
+      globals.groups[SpiritGroupType.BaseDefenceArmy],
+      globals.groups[SpiritGroupType.BaseAttackArmy],
+      globals.groups[SpiritGroupType.BaseDefenceArmy].totalSpiritCount,
+    );
+  }
+
+  private reassignFromGroup(sourceGroup: SpiritGroup, targetGroup: SpiritGroup, count: number) {
+    sourceGroup.removeSpirits(count).forEach(spiritWrapper => targetGroup.addSpirit(spiritWrapper));
   }
 }

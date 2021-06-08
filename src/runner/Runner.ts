@@ -13,6 +13,8 @@ export class Runner extends BaseClass {
   }
 
   public run() {
+    memory.tick++;
+
     // this.logger.logJSON(memory);
 
     for (const targetPool in globals.targetPools) {

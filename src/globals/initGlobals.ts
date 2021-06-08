@@ -14,7 +14,9 @@ import {HarvestChain} from "../group/HarvestChain";
 import {GroupAssigner} from "../runner/assigner/GroupAssigner";
 import {GroupRunner} from "../runner/GroupRunner";
 import {SentryLine} from "../group/SentryLine";
-import {DefenceArmy} from "../group/DefenceArmy";
+import {PatrolArmy} from "../group/PatrolArmy";
+import {PatrolPointsReference} from "../data/getPatrolPoints";
+import {SpiritGroupType} from "../group/SpiritGroup";
 
 export function initGlobals() {
   initBaseStar();
@@ -63,19 +65,26 @@ export function initGlobals() {
     })),
   };
 
-  globals.groups = [
-    new InitialGroup("init", {maxSpirits: -1}),
-    new HarvestChain("chain"),
-    new SentryLine("sentry"),
-    new DefenceArmy("defence", {maxSpirits: -1}),
-  ];
+  globals.groups = {
+    [SpiritGroupType.InitialGroup]: addInstanceToGlobal(new InitialGroup(`${SpiritGroupType.InitialGroup}`)),
+    [SpiritGroupType.HarvestChain]: addInstanceToGlobal(new HarvestChain(`${SpiritGroupType.HarvestChain}`)),
+    [SpiritGroupType.SentryLine]: addInstanceToGlobal(new SentryLine(`${SpiritGroupType.SentryLine}`)),
+    [SpiritGroupType.BaseDefenceArmy]: addInstanceToGlobal(new PatrolArmy(`${SpiritGroupType.BaseDefenceArmy}`,
+      {pointsReference: PatrolPointsReference.BaseDefence, emitEnemies: true})),
+    [SpiritGroupType.BaseAttackArmy]: addInstanceToGlobal(new PatrolArmy(`${SpiritGroupType.BaseAttackArmy}`,
+      {pointsReference: PatrolPointsReference.BaseAttack, emitEnemies: false}))
+  };
 
   globals.runner = addInstanceToGlobal(new GroupRunner("one", new GroupAssigner("group")));
 }
 
 export function initBaseStar() {
-  globals.base_star = {
+  globals.baseStar = {
     "star_zxq": star_zxq,
     "star_a1c": star_a1c,
-  }[memory.base_star];
+  }[memory.baseStar];
+  globals.enemyStar = {
+    "star_zxq": star_a1c,
+    "star_a1c": star_zxq,
+  }[memory.baseStar];
 }

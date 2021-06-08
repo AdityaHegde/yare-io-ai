@@ -12,8 +12,12 @@ import {BasicDischargeTask} from "../role/task/BasicDischargeTask";
 import {Runner} from "../runner/Runner";
 import {TargetPoolType} from "../role/target/TargetPool";
 import {SpiritWrapper} from "../wrappers/SpiritWrapper";
-import {SpiritGroup} from "../group/SpiritGroup";
+import {SpiritGroup, SpiritGroupType} from "../group/SpiritGroup";
 import {GroupAssigner} from "../runner/assigner/GroupAssigner";
+import {InitialGroup} from "../group/InitialGroup";
+import {HarvestChain} from "../group/HarvestChain";
+import {SentryLine} from "../group/SentryLine";
+import {PatrolArmy} from "../group/PatrolArmy";
 
 export const globals: {
   targetPools?: {
@@ -34,12 +38,21 @@ export const globals: {
     [RoleType.BasicAttacker]: Role,
   };
   roleAssigner?: RoleAssigner;
-  groups?: Array<SpiritGroup>;
+  groups?: {
+    [SpiritGroupType.InitialGroup]: InitialGroup,
+    [SpiritGroupType.HarvestChain]: HarvestChain,
+    [SpiritGroupType.SentryLine]: SentryLine,
+    [SpiritGroupType.BaseDefenceArmy]: PatrolArmy,
+    [SpiritGroupType.BaseAttackArmy]: PatrolArmy,
+  };
   groupAssigner?: GroupAssigner;
   runner?: Runner;
-  base_star?: Energy;
+  baseStar?: Energy;
+  enemyStar?: Energy;
+  enemySeen: boolean;
   instances: Record<string, Record<string, BaseClass>>;
 } = {
+  enemySeen: false,
   instances: {},
 };
 

@@ -12,6 +12,6 @@ export class EnergyTargetPool extends TargetPool<Energy, EnergyWrapper> {
   public static tag = TargetPoolType.Energy;
 
   protected getInitialTargets() {
-    return [globals.base_star];
+    return [globals.baseStar];
   }
 }

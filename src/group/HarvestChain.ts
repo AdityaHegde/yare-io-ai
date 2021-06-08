@@ -1,6 +1,6 @@
 import {inMemory} from "../memory/inMemory";
 import {getSpiritWrapper, globals} from "../globals/globals";
-import {ACTION_DISTANCE, ACTION_DISTANCE_SQUARED} from "../constants";
+import {ACTION_DISTANCE, ACTION_DISTANCE_SQUARED, HARVEST_LINK_BUFFER} from "../constants";
 import {atPosition, getDistance, moveToPoint} from "../utils/GridUtils";
 import {SpiritWrapper} from "../wrappers/SpiritWrapper";
 import {Log} from "../utils/Logger";
@@ -38,10 +38,10 @@ export class HarvestChain extends SlottedGroup {
   }
 
   protected getSlots(): Array<Position> {
-    const steps = Math.sqrt(getDistance(base, globals.base_star) / ACTION_DISTANCE_SQUARED);
+    const steps = Math.sqrt(getDistance(base, globals.baseStar) / ACTION_DISTANCE_SQUARED);
     const slots = new Array<Position>();
 
-    let prevPos = globals.base_star.position;
+    let prevPos = globals.baseStar.position;
     for (let i = 0; i < steps - 1; i++) {
       prevPos = moveToPoint(prevPos, base.position, ACTION_DISTANCE);
       slots.push(prevPos);
@@ -89,7 +89,7 @@ export class HarvestChain extends SlottedGroup {
   }
 
   private handleSpiritsNearStar(spirit: SpiritWrapper) {
-    if (spirit.entity.energy > 0) {
+    if (spirit.entity.energy > HARVEST_LINK_BUFFER) {
       spirit.energize(spirits[spirit.targetId]);
     } else {
       spirit.energize(spirit.entity);
@@ -97,10 +97,14 @@ export class HarvestChain extends SlottedGroup {
   }
 
   private handleSpiritsNearBase(spirit: SpiritWrapper) {
-    spirit.energize(base);
+    if (spirit.entity.energy > HARVEST_LINK_BUFFER) {
+      spirit.energize(base);
+    }
   }
 
   private handleSpiritsInTheMiddle(spirit: SpiritWrapper) {
-    spirit.energize(spirits[spirit.targetId]);
+    if (spirit.entity.energy > HARVEST_LINK_BUFFER) {
+      spirit.energize(spirits[spirit.targetId]);
+    }
   }
 }

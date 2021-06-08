@@ -14,6 +14,7 @@ export class SpiritImpl implements Spirit {
   public size: number;
   public position: Position;
   public sight = getBlankSight();
+  public mark: string;
 
   public owner: Player;
 
@@ -43,6 +44,12 @@ export class SpiritImpl implements Spirit {
   }
 
   public divide(): void {
+  }
+
+  public shout(message: string): void {
+  }
+
+  public set_mark(label: string): void {
   }
 
   public resetSight() {

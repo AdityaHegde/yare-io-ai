@@ -28,10 +28,13 @@ type EnergyEntity = Spirit | Base;
 type Intractable = EnergyEntity | Energy;
 
 interface Spirit extends Common {
+  mark: string;
   move: (position: Position) => void;
   energize: (target: Intractable) => void;
   merge: (target: Spirit) => void;
   divide: () => void;
+  shout: (message: string) => void;
+  set_mark: (label: string) => void;
 }
 
 declare const spirits: Record<string, Spirit>;
@@ -41,8 +44,13 @@ declare const enemy_base: Base;
 declare const star_zxq: Energy;
 declare const star_a1c: Energy;
 declare const memory: {
-  init: boolean;
+  tick: number;
   ids: Record<string, number>;
-  base_star: string;
+  baseStar: string;
   started: boolean;
+
+  lastSeenTick: number;
+  underAttack: boolean;
+
+  spirits: Record<string, Record<string, any>>;
 } & Record<string, any>;

@@ -3,14 +3,12 @@ import {initBaseStar} from "./initGlobals";
 import {getDistance} from "../utils/GridUtils";
 
 export function initMemory() {
-  memory.init = true;
+  memory.tick = memory.lastSeenTick = 0;
   memory.ids = {};
-  memory.base_star = getDistance(base, star_a1c) > getDistance(base, star_zxq) ? "star_zxq" : "star_a1c";
+  memory.baseStar = getDistance(base, star_a1c) > getDistance(base, star_zxq) ? "star_zxq" : "star_a1c";
   initBaseStar();
 
-  for (const targetPoolTag in globals.targetPools) {
-    globals.targetPools[targetPoolTag].init();
-  }
+  // Object.values(globals.targetPools).forEach(targetPool => targetPool.init());
 
-  globals.groups.forEach(group => group.init());
+  Object.values(globals.groups).forEach(group => group.init());
 }
