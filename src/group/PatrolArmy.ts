@@ -32,6 +32,10 @@ export class PatrolArmy extends SingleGroup {
 
     this.spiritIds.forEach((spiritId) => {
       const spiritWrapper = getSpiritWrapper(spiritId);
+      if (!this.checkAlive(spiritWrapper)) {
+        return;
+      }
+
       spiritWrappers.push(spiritWrapper);
       this.moveSpirit(spiritWrapper);
       this.attackInRange(spiritWrapper);

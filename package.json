@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npx rollup -c rollup.config.js --intro '(() => {' --outro '})()'",
-    "build-test": "npx webpack"
+    "build-test": "npx webpack && npm run build"
   },
   "mocha": {
     "require": [
@@ -15,6 +15,7 @@
   "author": "adityahegderocks@gmail.com",
   "license": "ISC",
   "devDependencies": {
+    "@adityahegde/yare-io-local": "0.0.5",
     "@rollup/stream": "^2.0.0",
     "@types/mocha": "^8.2.2",
     "@types/node": "^14.17.2",
