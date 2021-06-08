@@ -14,6 +14,16 @@ export class SpiritWrapper extends BaseWrapper<Spirit> {
   @inMemory(() => "")
   public targetId: string;
 
+  public freshSpirit: boolean;
+  public energyExcess: number;
+
+  constructor(entity: Spirit) {
+    super(entity);
+
+    this.freshSpirit = memory.spirits && !(entity.id in memory.spirits);
+    this.energyExcess = entity.energy;
+  }
+
   // Aliases
   public move(position: Position) {
     this.entity.move(position);
@@ -31,7 +41,7 @@ export class SpiritWrapper extends BaseWrapper<Spirit> {
     return this.entity.energy === this.entity.energy_capacity;
   }
   public isEmpty() {
-    return this.entity.energy === 0;
+    return this.entity.energy <= 0;
   }
 
   // Operations

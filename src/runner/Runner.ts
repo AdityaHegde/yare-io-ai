@@ -1,35 +1,28 @@
 import {BaseClass} from "../BaseClass";
-import {getWrapperInstance, globals} from "../globals/globals";
-import {SpiritWrapper} from "../wrappers/SpiritWrapper";
-import {RoleType} from "../role/Role";
+import {globals} from "../globals/globals";
 import {Log} from "../utils/Logger";
+import {Assigner} from "./assigner/Assigner";
 
 @Log
 export class Runner extends BaseClass {
+  public assigner: Assigner;
+
+  constructor(id: string, assigner: Assigner) {
+    super(id);
+    this.assigner = assigner;
+  }
+
   public run() {
+    memory.tick++;
+
     // this.logger.logJSON(memory);
 
     for (const targetPool in globals.targetPools) {
       globals.targetPools[targetPool].updateTargets();
     }
 
-    for (const spirit of my_spirits) {
-      const spiritWrapper = getWrapperInstance(SpiritWrapper as any, spirit) as SpiritWrapper;
-
-      if (!spiritWrapper.checkAlive()) {
-        // this.logger.log(`${spiritWrapper.entity.id} has died.`);
-        if (spiritWrapper.role) {
-          globals.roles[spiritWrapper.role].removeSpirit(spiritWrapper);
-        }
-        return;
-      }
-
-      if (spiritWrapper.role === RoleType.Free) {
-        // this.logger.log(`${spiritWrapper.entity.id} is free.`);
-        globals.assigner.assign(spiritWrapper);
-      }
-
-      globals.roles[spiritWrapper.role].processSpirit(spiritWrapper);
-    }
+    this.runCore();
   }
+
+  public runCore() {}
 }

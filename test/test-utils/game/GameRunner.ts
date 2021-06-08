@@ -2,7 +2,6 @@ import {Game} from "./Game";
 import {Log, Logger} from "../../../src/utils/Logger";
 import {runLoop} from "../../../src/runLoop";
 import EventEmitter from "events";
-import {SpiritImpl} from "./impl/SpiritImpl";
 import {Player} from "./Player";
 
 @Log
@@ -34,15 +33,19 @@ export class GameRunner extends EventEmitter {
   }
 
   private tick() {
+    this.game.grid.tick();
     for (let i = 0; i < this.game.players.length; i++) {
       this.tickForPlayer(i);
     }
+    this.game.gameEventLoop.tick();
   }
 
   private postTick() {
     for (let i = 0; i < this.game.players.length; i++) {
       this.postTickForPlayer(i);
     }
+    this.game.gameEventLoop.postTick();
+    this.game.grid.postTick();
   }
 
   private tickForPlayer(index: number) {
@@ -55,7 +58,11 @@ export class GameRunner extends EventEmitter {
       }
     }
 
-    runLoop();
+    try {
+      runLoop();
+    } catch (err) {
+      this.logger.error(err);
+    }
   }
 
   private postTickForPlayer(index: number) {

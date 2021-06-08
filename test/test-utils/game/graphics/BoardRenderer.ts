@@ -4,6 +4,7 @@ import {RenderObject} from "./RenderObject";
 import {SpiritImpl} from "../impl/SpiritImpl";
 import {Logger} from "ts-loader/dist/logger";
 import {Log} from "../../../../src/utils/Logger";
+import {MAX_X, MAX_Y} from "../../../../src/constants";
 
 @Log
 export class BoardRenderer {
@@ -16,9 +17,9 @@ export class BoardRenderer {
   constructor(game: Game) {
     this.game = game;
     this.app = new PIXI.Application({
-      width: 2500, height: 2500,
+      width: MAX_X, height: MAX_Y,
       backgroundColor: 0x06080a,
-      resolution: 0.5,
+      resolution: 0.25,
       antialias: true,
     });
   }

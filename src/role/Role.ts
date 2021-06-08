@@ -10,7 +10,7 @@ export enum RoleType {
   BasicHarvester,
   BasicDefender,
   BasicAttacker,
-  Army,
+  Group,
 }
 
 @Log
@@ -35,6 +35,8 @@ export class Role extends BaseClass {
 
   @inMemory(() => 0)
   public spiritsCount: number;
+
+  public init() {}
 
   public processSpirit(spirit: SpiritWrapper): boolean {
     // this.logger.log(`${spirit.id} is running role=${this.type} task=${spirit.task}`);

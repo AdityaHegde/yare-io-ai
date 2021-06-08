@@ -31,6 +31,13 @@ export class TargetPool<EntityType extends Intractable, WrapperType extends Base
     this.addTargets(this.getUpdatedTargets());
   }
 
+  public addTarget(target: WrapperType) {
+    this.targets.add(target);
+  }
+  public removeTarget(target: WrapperType) {
+    this.targets.delete(target);
+  }
+
   protected getInitialTargets() {
     return [];
   }

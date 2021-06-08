@@ -5,12 +5,19 @@ import {EnemySpiritTargetPool} from "../role/target/EnemySpiritTargetPool";
 import {Role, RoleType} from "../role/Role";
 import {BaseClass} from "../BaseClass";
 import {BaseWrapper} from "../wrappers/BaseWrapper";
-import {RoleAssigner} from "../role/RoleAssigner";
+import {RoleAssigner} from "../runner/assigner/RoleAssigner";
 import {TaskType} from "../role/task/Task";
 import {BasicChargeTask} from "../role/task/BasicChargeTask";
 import {BasicDischargeTask} from "../role/task/BasicDischargeTask";
 import {Runner} from "../runner/Runner";
 import {TargetPoolType} from "../role/target/TargetPool";
+import {SpiritWrapper} from "../wrappers/SpiritWrapper";
+import {SpiritGroup, SpiritGroupType} from "../group/SpiritGroup";
+import {GroupAssigner} from "../runner/assigner/GroupAssigner";
+import {InitialGroup} from "../group/InitialGroup";
+import {HarvestChain} from "../group/HarvestChain";
+import {SentryLine} from "../group/SentryLine";
+import {PatrolArmy} from "../group/PatrolArmy";
 
 export const globals: {
   targetPools?: {
@@ -30,10 +37,22 @@ export const globals: {
     [RoleType.BasicDefender]: Role,
     [RoleType.BasicAttacker]: Role,
   };
-  assigner?: RoleAssigner;
+  roleAssigner?: RoleAssigner;
+  groups?: {
+    [SpiritGroupType.InitialGroup]: InitialGroup,
+    [SpiritGroupType.HarvestChain]: HarvestChain,
+    [SpiritGroupType.SentryLine]: SentryLine,
+    [SpiritGroupType.BaseDefenceArmy]: PatrolArmy,
+    [SpiritGroupType.BaseAttackArmy]: PatrolArmy,
+  };
+  groupAssigner?: GroupAssigner;
   runner?: Runner;
+  baseStar?: Energy;
+  enemyStar?: Energy;
+  enemySeen: boolean;
   instances: Record<string, Record<string, BaseClass>>;
 } = {
+  enemySeen: false,
   instances: {},
 };
 
@@ -58,4 +77,8 @@ export function getWrapperInstance<EntityType extends Intractable>(
   BaseWrapperClazz: typeof BaseWrapper, entity: EntityType,
 ): BaseWrapper<EntityType> {
   return addInstanceToGlobal(BaseWrapperClazz.getInstanceByEntity(entity)) as BaseWrapper<EntityType>;
+}
+
+export function getSpiritWrapper(spiritId: string): SpiritWrapper {
+  return getWrapperInstance(SpiritWrapper as any, spirits[spiritId]) as SpiritWrapper;
 }

@@ -5,7 +5,7 @@ import {globals} from "./globals/globals";
 export function runLoop() {
   initGlobals();
 
-  if (!memory.init) {
+  if (!("tick" in memory)) {
     initMemory();
   }
 
