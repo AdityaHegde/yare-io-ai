@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npx rollup -c rollup.config.js --intro '(() => {' --outro '})()'",
+    "build": "node build.js",
     "build-test": "npx webpack && npm run build"
   },
   "mocha": {

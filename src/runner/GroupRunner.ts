@@ -4,6 +4,10 @@ import {RoleType} from "../role/Role";
 import {UNDER_ATTACK_BUFFER} from "../constants";
 
 export class GroupRunner extends Runner {
+  public init() {
+    Object.values(globals.groups).forEach(group => group.init());
+  }
+
   public runCore() {
     this.assigner.preTick();
 

@@ -12,6 +12,8 @@ export class Runner extends BaseClass {
     this.assigner = assigner;
   }
 
+  public init() {}
+
   public run() {
     memory.tick++;
 

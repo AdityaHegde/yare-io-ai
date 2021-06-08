@@ -11,8 +11,6 @@ import {TargetPoolType} from "../role/target/TargetPool";
 import {MAX_DEFENDERS, MAX_HARVESTERS} from "../constants";
 import {InitialGroup} from "../group/InitialGroup";
 import {HarvestChain} from "../group/HarvestChain";
-import {GroupAssigner} from "../runner/assigner/GroupAssigner";
-import {GroupRunner} from "../runner/GroupRunner";
 import {SentryLine} from "../group/SentryLine";
 import {PatrolArmy} from "../group/PatrolArmy";
 import {PatrolPointsReference} from "../data/getPatrolPoints";
@@ -74,8 +72,6 @@ export function initGlobals() {
     [SpiritGroupType.BaseAttackArmy]: addInstanceToGlobal(new PatrolArmy(`${SpiritGroupType.BaseAttackArmy}`,
       {pointsReference: PatrolPointsReference.BaseAttack, emitEnemies: false}))
   };
-
-  globals.runner = addInstanceToGlobal(new GroupRunner("one", new GroupAssigner("group")));
 }
 
 export function initBaseStar() {

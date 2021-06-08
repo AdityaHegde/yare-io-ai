@@ -37,7 +37,6 @@ export const globals: {
     [RoleType.BasicDefender]: Role,
     [RoleType.BasicAttacker]: Role,
   };
-  roleAssigner?: RoleAssigner;
   groups?: {
     [SpiritGroupType.InitialGroup]: InitialGroup,
     [SpiritGroupType.HarvestChain]: HarvestChain,
@@ -45,8 +44,6 @@ export const globals: {
     [SpiritGroupType.BaseDefenceArmy]: PatrolArmy,
     [SpiritGroupType.BaseAttackArmy]: PatrolArmy,
   };
-  groupAssigner?: GroupAssigner;
-  runner?: Runner;
   baseStar?: Energy;
   enemyStar?: Energy;
   enemySeen: boolean;

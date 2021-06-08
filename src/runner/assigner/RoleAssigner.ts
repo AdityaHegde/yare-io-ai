@@ -15,7 +15,7 @@ export class RoleAssigner extends Assigner {
 
     for (let i = 0; i < roleOrder.length; i++) {
       if (roleOrder[i].maxSpirits === -1 || roleOrder[i].spiritsCount < roleOrder[i].maxSpirits) {
-        this.logger.log(`${spiritWrapper.id} was assigned to "${roleOrder[i].type}"`);
+        // this.logger.log(`${spiritWrapper.id} was assigned to "${roleOrder[i].type}"`);
         roleOrder[i].addSpirit(spiritWrapper);
         break;
       }

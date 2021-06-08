@@ -12,8 +12,8 @@ const game = new Game([SpiritType.Circle, SpiritType.Circle]);
 const yare = new Yare(
   game,
   new GameRunner(game, [
-    new IframeRunner("http://localhost:8001/yare.js"),
-    new IframeRunner("http://localhost:8000/yare.js"),
+    new IframeRunner("http://localhost:8000/groups-ai.js"),
+    new IframeRunner("http://localhost:8000/roles-ai.js"),
   ]),
   new BoardRenderer(game, div),
   { runIntervalInMs: 50 },

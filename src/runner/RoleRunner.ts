@@ -3,6 +3,10 @@ import {getSpiritWrapper, globals} from "../globals/globals";
 import {RoleType} from "../role/Role";
 
 export class RoleRunner extends Runner {
+  public init() {
+    Object.values(globals.targetPools).forEach(targetPool => targetPool.init());
+  }
+
   public runCore() {
     for (const spirit of my_spirits) {
       const spiritWrapper = getSpiritWrapper(spirit.id);
