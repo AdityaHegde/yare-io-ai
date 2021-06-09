@@ -7,10 +7,17 @@ import {Log} from "../utils/Logger";
 
 export enum RoleType {
   Free,
-  BasicHarvester,
-  BasicDefender,
-  BasicAttacker,
+  Harvester,
+  Defender,
+  Attacker,
   Group,
+}
+
+export type RoleOpts = {
+  type: RoleType;
+  tasks: Array<Task<any, any>>;
+  startFromScratch: boolean;
+  maxSpirits: number;
 }
 
 @Log
@@ -18,19 +25,18 @@ export enum RoleType {
 export class Role extends BaseClass {
   public type: RoleType;
   public tasks: Array<Task<any, any>>;
-  public maxSpirits: number;
+  protected readonly startFromScratch: boolean;
+  protected readonly maxSpirits: number;
 
   constructor(id: string, {
-    type, tasks, maxSpirits,
-  }: {
-    type: RoleType,
-    tasks: Array<Task<any, any>>,
-    maxSpirits: number,
-  }) {
+    type, tasks,
+    startFromScratch, maxSpirits,
+  }: RoleOpts) {
     super(id);
     this.type = type;
     this.tasks = tasks;
     this.maxSpirits = maxSpirits;
+    this.startFromScratch = startFromScratch;
   }
 
   @inMemory(() => 0)
@@ -47,14 +53,20 @@ export class Role extends BaseClass {
     return true;
   }
 
-  public addSpirit(spirit: SpiritWrapper) {
-    spirit.role = this.type;
-    spirit.task = 0;
+  public addSpirit(spiritWrapper: SpiritWrapper) {
+    spiritWrapper.role = this.type;
+    spiritWrapper.task = 0;
     this.spiritsCount++;
   }
 
-  public removeSpirit(spirit: SpiritWrapper) {
-    spirit.role = RoleType.Free;
+  public removeSpirit(spiritWrapper: SpiritWrapper) {
+    spiritWrapper.role = RoleType.Free;
+    spiritWrapper.task = 0;
     this.spiritsCount--;
+  }
+
+  public hasSpace() {
+    return (this.startFromScratch && this.spiritsCount === 0) ||
+      this.maxSpirits === -1 || this.spiritsCount < this.maxSpirits;
   }
 }

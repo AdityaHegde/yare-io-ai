@@ -16,7 +16,7 @@ const yare = new Yare(
     new IframeRunner("http://localhost:8000/roles-ai.js"),
   ]),
   new BoardRenderer(game, div),
-  { runIntervalInMs: 50 },
+  { runIntervalInMs: 25 },
 );
 
 setTimeout(() => {

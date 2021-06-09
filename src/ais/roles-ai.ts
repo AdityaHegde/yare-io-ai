@@ -1,15 +1,3 @@
-import {initGlobals} from "../globals/initGlobals";
-import {initMemory} from "../globals/initMemory";
-import {RoleRunner} from "../runner/RoleRunner";
-import {RoleAssigner} from "../runner/assigner/RoleAssigner";
+import {getBasicRoleRunner} from "../runner/factory/roleRunnerFactory";
 
-initGlobals();
-
-const runner = new RoleRunner("one", new RoleAssigner("one"));
-
-if (!("tick" in memory)) {
-  initMemory();
-  runner.init();
-}
-
-runner.run();
+getBasicRoleRunner().run();

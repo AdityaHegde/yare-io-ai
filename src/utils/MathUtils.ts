@@ -1,6 +1,6 @@
 export function findInArray<T>(
   array: Array<T>,
-  valueGetter: (a: T) => number = (a: T) => a as any,
+  valueGetter: (a: T, idx: number) => number = (a: T) => a as any,
   checkFunc: (a: number, b: number, idx: number) => number = (a, b) => a - b,
 ): [element: T, idx: number] {
   if (array.length === 0) {
@@ -10,11 +10,11 @@ export function findInArray<T>(
     return [array[0], 0];
   }
 
-  let found = valueGetter(array[0]);
+  let found = valueGetter(array[0], 0);
   let foundIdx = 0;
 
   for (let i = 1; i < array.length; i++) {
-    const value = valueGetter(array[i]);
+    const value = valueGetter(array[i], i);
 
     if (checkFunc(found, value, i) > 0) {
       found = value;

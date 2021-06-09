@@ -1,10 +1,18 @@
 import {inMemory} from "../memory/inMemory";
 import {getSpiritWrapper, globals} from "../globals/globals";
-import {ACTION_DISTANCE, ACTION_DISTANCE_SQUARED, HARVEST_LINK_BUFFER} from "../constants";
-import {atPosition, getDistance, moveToPoint} from "../utils/GridUtils";
+import {ACTION_DISTANCE, ACTION_DISTANCE_SQUARED, SOLDIER_ENERGY_THRESHOLD} from "../constants";
+import {atPosition, getDistance, isWithinRange, moveToPoint} from "../utils/GridUtils";
 import {SpiritWrapper} from "../wrappers/SpiritWrapper";
 import {Log} from "../utils/Logger";
 import {SlottedGroup} from "./SlottedGroup";
+import {PatrolArmy} from "./PatrolArmy";
+import {SpiritGroupType} from "./SpiritGroupType";
+import {findInArray} from "../utils/MathUtils";
+
+export type HarvestChainOpts = {
+  armySupportType: SpiritGroupType;
+  energyBuffer: number;
+}
 
 /**
  * Forms a chain of spirits to drop off energy
@@ -19,11 +27,28 @@ export class HarvestChain extends SlottedGroup {
 
   @inMemory()
   public spiritIdsBySlot: Array<Array<string>>;
-  // cursor to "this.spirits" of free spirit per slot in the chain
-  @inMemory()
+  // cursor to "this.spiritIdsBySlot" of spirit with energy capacity per slot
   public freeCursorBySlot: Array<number>;
 
+  private readonly armySupportType: SpiritGroupType;
+  private readonly energyBuffer: number;
+
+  constructor(id: string, {
+    armySupportType,
+    energyBuffer,
+  }: HarvestChainOpts) {
+    super(id);
+    this.armySupportType = armySupportType;
+    this.energyBuffer = energyBuffer;
+  }
+
   public run() {
+    this.freeCursorBySlot = this.slots.map(_ => 0);
+
+    this.spiritIdsBySlot.forEach((spiritIdsInSlot) => {
+      this.filterDeadSpirits(spiritIdsInSlot);
+    });
+
     // spirits near star
     this.spiritIdsBySlot[0].forEach(spiritId => this.handleSpirit(spiritId, 0, "handleSpiritsNearStar"));
 
@@ -50,23 +75,33 @@ export class HarvestChain extends SlottedGroup {
     return slots;
   }
 
-  private assignTarget(spirit: SpiritWrapper): boolean {
-    const nextLink = spirit.task + 1;
+  protected getFreeSlot(): number {
+    const [, idx] = findInArray(this.spiritCountBySlot,
+      (a: number, idx: number) => idx === 0 ? a/2 : a);
+    return idx;
+  }
+
+  private assignTarget(spiritWrapper: SpiritWrapper): SpiritWrapper {
+    const nextLink = spiritWrapper.task + 1;
     // last link wont have any targets
-    if (nextLink === this.slots.length) {
-      return true;
+    if (nextLink === this.slots.length || this.spiritIdsBySlot[nextLink].length === 0) {
+      return null;
     }
 
-    // if there is no target assigned or the target is dead
-    if (!spirit.targetId || !spirits[spirit.targetId]) {
-      // no spirit to target
-      if (this.spiritIdsBySlot[nextLink].length <= this.freeCursorBySlot[nextLink]) {
-        return false;
+    const curCursor = this.freeCursorBySlot[nextLink];
+    let i = curCursor;
+    do {
+      i = (i + 1) % this.spiritIdsBySlot[nextLink].length;
+
+      const targetSpiritWrapper = getSpiritWrapper(this.spiritIdsBySlot[nextLink][i]);
+
+      if (targetSpiritWrapper.hasSpaceForEnergy(spiritWrapper)) {
+        this.freeCursorBySlot[nextLink] = i;
+        return targetSpiritWrapper;
       }
-      spirit.targetId = this.spiritIdsBySlot[nextLink][this.freeCursorBySlot[nextLink]];
-      this.freeCursorBySlot[nextLink]++;
-    }
-    return true;
+    } while(i !== curCursor);
+
+    return null;
   }
 
   private handleSpirit(
@@ -78,33 +113,57 @@ export class HarvestChain extends SlottedGroup {
       return;
     }
 
-    if (atPosition(spiritWrapper.entity, this.slots[slotIdx])) {
-      if (!this.assignTarget(spiritWrapper)) {
-        return;
-      }
-      this[forwardMethod](spiritWrapper);
-    } else {
+    if (this.supplyArmy(spiritWrapper)) {
+      return;
+    }
+
+    if (!atPosition(spiritWrapper.entity, this.slots[slotIdx])) {
       spiritWrapper.move(this.slots[slotIdx]);
     }
+    const targetSpiritWrapper = this.assignTarget(spiritWrapper);
+    this[forwardMethod](spiritWrapper, targetSpiritWrapper);
   }
 
-  private handleSpiritsNearStar(spirit: SpiritWrapper) {
-    if (spirit.entity.energy > HARVEST_LINK_BUFFER) {
-      spirit.energize(spirits[spirit.targetId]);
+  private supplyArmy(spiritWrapper: SpiritWrapper): boolean {
+    const armyGroup = globals.groups[this.armySupportType] as PatrolArmy;
+
+    if (!armyGroup) {
+      return false;
+    }
+
+    for (let i = 0; i < armyGroup.spiritIds.length; i++) {
+      const soldier = getSpiritWrapper(armyGroup.spiritIds[i]);
+      if (isWithinRange(spiritWrapper.entity, soldier.entity) &&
+        soldier.hasSpaceForEnergy(spiritWrapper) && soldier.entity.energy <= SOLDIER_ENERGY_THRESHOLD)  {
+        // this.logger.log(`${spiritWrapper.id} supplying ${soldier.id} (${soldier.entropy})`);
+        soldier.addPotentialEnergy(spiritWrapper);
+        spiritWrapper.energize(soldier.entity);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private handleSpiritsNearStar(spiritWrapper: SpiritWrapper, targetSpiritWrapper: SpiritWrapper) {
+    if (spiritWrapper.entropyIsAboveThreshold(this.energyBuffer) && targetSpiritWrapper) {
+      spiritWrapper.energize(targetSpiritWrapper.entity);
+      targetSpiritWrapper.removePotentialEnergy(spiritWrapper);
     } else {
-      spirit.energize(spirit.entity);
+      spiritWrapper.energize(spiritWrapper.entity);
     }
   }
 
-  private handleSpiritsNearBase(spirit: SpiritWrapper) {
-    if (spirit.entity.energy > HARVEST_LINK_BUFFER) {
-      spirit.energize(base);
+  private handleSpiritsNearBase(spiritWrapper: SpiritWrapper, targetSpiritWrapper: SpiritWrapper) {
+    if (spiritWrapper.entropyIsAboveThreshold(this.energyBuffer)) {
+      spiritWrapper.energize(base);
     }
   }
 
-  private handleSpiritsInTheMiddle(spirit: SpiritWrapper) {
-    if (spirit.entity.energy > HARVEST_LINK_BUFFER) {
-      spirit.energize(spirits[spirit.targetId]);
+  private handleSpiritsInTheMiddle(spiritWrapper: SpiritWrapper, targetSpiritWrapper: SpiritWrapper) {
+    if (spiritWrapper.entropyIsAboveThreshold(this.energyBuffer) && targetSpiritWrapper) {
+      spiritWrapper.energize(targetSpiritWrapper.entity);
+      targetSpiritWrapper.removePotentialEnergy(spiritWrapper);
     }
   }
 }

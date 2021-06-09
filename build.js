@@ -2,9 +2,9 @@ const rollup = require("rollup");
 const typescript = require("rollup-plugin-typescript2");
 const {readdirSync} = require("fs");
 
-readdirSync("src/ais").forEach(async (ai) => {
-  const bundle = await rollup.rollup({
-    input: `src/ais/${ai}`,
+function getInputOptions(file) {
+  return {
+    input: `src/ais/${file}`,
     plugins: [typescript({
       tsconfigOverride: {
         compilerOptions: {
@@ -15,12 +15,37 @@ readdirSync("src/ais").forEach(async (ai) => {
         }
       }
     })],
-  });
-  await bundle.write({
-    file: `dist/${ai.replace(/ts$/, "js")}`,
+  };
+}
+
+function getOutputOptions(file) {
+  return {
+    file: `dist/${file.replace(/ts$/, "js")}`,
     format: "cjs",
     intro: "(() => {",
     outro: "})()",
-  });
-  await bundle.close();
+  };
+}
+
+readdirSync("src/ais").forEach(async (ai) => {
+  if (process.argv[2] === "watch") {
+    (await rollup.watch({
+      ...getInputOptions(ai),
+      output: getOutputOptions(ai),
+      watch: {
+        buildDelay: 1000,
+      },
+    })).on("event", ({ result, code }) => {
+      if (code === "BUNDLE_END") {
+        console.log(`Finished building ${ai}`);
+      }
+      if (result) {
+        result.close();
+      }
+    });
+  } else {
+    const bundle = await rollup.rollup(getInputOptions(ai));
+    await bundle.write(getOutputOptions(ai));
+    await bundle.close();
+  }
 });

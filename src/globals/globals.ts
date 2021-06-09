@@ -5,19 +5,17 @@ import {EnemySpiritTargetPool} from "../role/target/EnemySpiritTargetPool";
 import {Role, RoleType} from "../role/Role";
 import {BaseClass} from "../BaseClass";
 import {BaseWrapper} from "../wrappers/BaseWrapper";
-import {RoleAssigner} from "../runner/assigner/RoleAssigner";
 import {TaskType} from "../role/task/Task";
 import {BasicChargeTask} from "../role/task/BasicChargeTask";
 import {BasicDischargeTask} from "../role/task/BasicDischargeTask";
-import {Runner} from "../runner/Runner";
 import {TargetPoolType} from "../role/target/TargetPool";
 import {SpiritWrapper} from "../wrappers/SpiritWrapper";
-import {SpiritGroup, SpiritGroupType} from "../group/SpiritGroup";
-import {GroupAssigner} from "../runner/assigner/GroupAssigner";
 import {InitialGroup} from "../group/InitialGroup";
 import {HarvestChain} from "../group/HarvestChain";
 import {SentryLine} from "../group/SentryLine";
 import {PatrolArmy} from "../group/PatrolArmy";
+import {RallyTask} from "../role/task/RallyTask";
+import {SpiritGroupType} from "../group/SpiritGroupType";
 
 export const globals: {
   targetPools?: {
@@ -27,15 +25,16 @@ export const globals: {
     [TargetPoolType.EnemySpirit]: EnemySpiritTargetPool;
   };
   tasks?: {
-    [TaskType.BasicCharge]: BasicChargeTask,
-    [TaskType.BasicStore]: BasicDischargeTask,
-    [TaskType.BasicBaseDefend]: BasicDischargeTask,
-    [TaskType.BasicBaseAttack]: BasicDischargeTask,
+    [TaskType.Charge]: BasicChargeTask,
+    [TaskType.Store]: BasicDischargeTask,
+    [TaskType.BaseDefend]: BasicDischargeTask,
+    [TaskType.Rally]: RallyTask,
+    [TaskType.BaseAttack]: RallyTask,
   };
   roles?: {
-    [RoleType.BasicHarvester]: Role,
-    [RoleType.BasicDefender]: Role,
-    [RoleType.BasicAttacker]: Role,
+    [RoleType.Harvester]: Role,
+    [RoleType.Defender]: Role,
+    [RoleType.Attacker]: Role,
   };
   groups?: {
     [SpiritGroupType.InitialGroup]: InitialGroup,
@@ -46,12 +45,14 @@ export const globals: {
   };
   baseStar?: Energy;
   enemyStar?: Energy;
-  enemySeen: boolean;
-  instances: Record<string, Record<string, BaseClass>>;
-} = {
-  enemySeen: false,
-  instances: {},
-};
+
+  uniqueEnemiesSeen?: Set<string>;
+  enemySeen?: boolean;
+
+  enemiesTargeted?: Set<string>;
+
+  instances?: Record<string, Record<string, BaseClass>>;
+} = {};
 
 export function addInstanceToGlobal<T extends BaseClass>(instance: T): T {
   const BaseClazz: typeof BaseClass = instance.constructor as typeof BaseClass;

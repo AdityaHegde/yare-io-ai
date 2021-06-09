@@ -17,43 +17,41 @@ export class SlottedGroup extends SpiritGroup {
 
   @inMemory()
   public spiritIdsBySlot: Array<Array<string>>;
-  // cursor to "this.spirits" of free spirit per slot
-  @inMemory()
-  public freeCursorBySlot: Array<number>;
 
   public init() {
     this.slots = this.getSlots();
     this.spiritCountBySlot = this.slots.map(_ => 0);
     this.spiritIdsBySlot = this.slots.map(_ => []);
-    this.freeCursorBySlot = this.slots.map(_ => 0);
   }
 
-  public addSpirit(spirit: SpiritWrapper) {
-    const [, idx] = findInArray(this.spiritCountBySlot);
+  public addSpirit(spiritWrapper: SpiritWrapper) {
+    const idx = this.getFreeSlot();
     if (idx === -1) {
       return;
     }
 
-    spirit.role = RoleType.Group;
-    spirit.task = idx;
+    spiritWrapper.role = RoleType.Group;
+    spiritWrapper.task = idx;
     this.spiritCountBySlot[idx]++;
     this.totalSpiritCount++;
-    this.spiritIdsBySlot[idx].push(spirit.id);
+    this.spiritIdsBySlot[idx].push(spiritWrapper.id);
   }
 
-  public removeSpirit(spirit: SpiritWrapper) {
-    spirit.role = RoleType.Free;
-    this.spiritCountBySlot[spirit.task]--;
+  public removeSpirit(spiritWrapper: SpiritWrapper) {
+    spiritWrapper.role = RoleType.Free;
+    spiritWrapper.task = 0;
+    this.spiritCountBySlot[spiritWrapper.task]--;
     this.totalSpiritCount--;
-    const idx = this.spiritIdsBySlot[spirit.task].indexOf(spirit.id);
-    this.spiritIdsBySlot[spirit.task].splice(idx);
-    // if removed spirit was behind cursor, decrement it
-    if (idx < this.freeCursorBySlot[spirit.task]) {
-      this.freeCursorBySlot[spirit.task]--;
-    }
+    const idx = this.spiritIdsBySlot[spiritWrapper.task].indexOf(spiritWrapper.id);
+    this.spiritIdsBySlot[spiritWrapper.task].splice(idx, 1);
   }
 
   protected getSlots(): Array<Position> {
     return [];
+  }
+
+  protected getFreeSlot(): number {
+    const [, idx] = findInArray(this.spiritCountBySlot);
+    return idx;
   }
 }

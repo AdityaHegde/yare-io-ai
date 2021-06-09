@@ -2,15 +2,16 @@ import {SpiritWrapper} from "../../wrappers/SpiritWrapper";
 import {globals} from "../../globals/globals";
 import {Assigner} from "./Assigner";
 import {Log} from "../../utils/Logger";
-import {SpiritGroup, SpiritGroupType} from "../../group/SpiritGroup";
-import {InitialGroup} from "../../group/InitialGroup";
-import {HarvestChain} from "../../group/HarvestChain";
-import {SentryLine} from "../../group/SentryLine";
-import {PatrolArmy} from "../../group/PatrolArmy";
-import {HARVESTER_DEFENDER_RATIO, SENTRY_ACTIVATION_POINT} from "../../constants";
+import {SpiritGroup} from "../../group/SpiritGroup";
+import {SpiritGroupType} from "../../group/SpiritGroupType";
+
+type GroupAssignerConfig = {
+  harvesterSentryRatio: number;
+  harvesterDefenderRatio: number;
+}
 
 @Log
-export class GroupAssigner extends Assigner {
+export class GroupAssigner extends Assigner<GroupAssignerConfig> {
   public preTick() {
     this.reassignToDefence();
   }
@@ -28,14 +29,13 @@ export class GroupAssigner extends Assigner {
 
     // sentry line would be killed if there is an attack
     // do not assign until attack has been cleared
-    if (!memory.underAttack && harvesterGroup.totalSpiritCount >= SENTRY_ACTIVATION_POINT &&
+    if (!memory.underAttack && this.checkRatio(harvesterGroup, sentryLine, this.config.harvesterSentryRatio) &&
         sentryLine.hasSpace()) {
       this.assignSpiritToGroup(spiritWrapper, sentryLine);
       return;
     }
 
-    if (memory.underAttack && (baseDefenceArmy.totalSpiritCount === 0 ||
-        harvesterGroup.totalSpiritCount / baseDefenceArmy.totalSpiritCount > HARVESTER_DEFENDER_RATIO)) {
+    if (memory.underAttack && this.checkRatio(harvesterGroup, baseDefenceArmy, this.config.harvesterSentryRatio)) {
       this.assignSpiritToGroup(spiritWrapper, baseDefenceArmy);
       return;
     }
@@ -44,20 +44,18 @@ export class GroupAssigner extends Assigner {
   }
 
   public postTick() {
-    this.reassignToAttack();
+    this.reassignToHarvest();
   }
 
   private reassignToDefence() {
-    if (!memory.underAttack || globals.groups[SpiritGroupType.HarvestChain].totalSpiritCount <=
-        globals.groups[SpiritGroupType.BaseDefenceArmy].totalSpiritCount * HARVESTER_DEFENDER_RATIO) {
+    if (!memory.underAttack || globals.groups[SpiritGroupType.BaseDefenceArmy].totalSpiritCount >= memory.uniqueEnemies.length) {
       return;
     }
 
     this.reassignFromGroup(
       globals.groups[SpiritGroupType.HarvestChain],
       globals.groups[SpiritGroupType.BaseDefenceArmy],
-      globals.groups[SpiritGroupType.HarvestChain].totalSpiritCount -
-        globals.groups[SpiritGroupType.BaseDefenceArmy].totalSpiritCount * HARVESTER_DEFENDER_RATIO,
+      Math.min(memory.uniqueEnemies.length * 1.5, globals.groups[SpiritGroupType.HarvestChain].totalSpiritCount),
     );
   }
 
@@ -66,19 +64,23 @@ export class GroupAssigner extends Assigner {
     selectedGroup.addSpirit(spiritWrapper);
   }
 
-  private reassignToAttack() {
+  private reassignToHarvest() {
     if (memory.underAttack || globals.groups[SpiritGroupType.BaseDefenceArmy].totalSpiritCount === 0) {
       return;
     }
 
     this.reassignFromGroup(
       globals.groups[SpiritGroupType.BaseDefenceArmy],
-      globals.groups[SpiritGroupType.BaseAttackArmy],
+      globals.groups[SpiritGroupType.HarvestChain],
       globals.groups[SpiritGroupType.BaseDefenceArmy].totalSpiritCount,
     );
   }
 
   private reassignFromGroup(sourceGroup: SpiritGroup, targetGroup: SpiritGroup, count: number) {
     sourceGroup.removeSpirits(count).forEach(spiritWrapper => targetGroup.addSpirit(spiritWrapper));
+  }
+
+  private checkRatio(sourceGroup: SpiritGroup, targetGroup: SpiritGroup, ratio: number) {
+    return sourceGroup.totalSpiritCount / (targetGroup.totalSpiritCount + 1) >= ratio;
   }
 }

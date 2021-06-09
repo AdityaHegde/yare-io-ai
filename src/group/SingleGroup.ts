@@ -13,15 +13,6 @@ export class SingleGroup extends SpiritGroup {
 
   public maxSpirits: number;
 
-  constructor(id: string, {
-    maxSpirits
-  }: {
-    maxSpirits: number,
-  } = {maxSpirits: -1}) {
-    super(id);
-    this.maxSpirits = maxSpirits;
-  }
-
   public addSpirit(spiritWrapper: SpiritWrapper) {
     spiritWrapper.role = RoleType.Group;
     this.spiritIds.push(spiritWrapper.id);
@@ -30,6 +21,7 @@ export class SingleGroup extends SpiritGroup {
 
   public removeSpirit(spiritWrapper: SpiritWrapper) {
     spiritWrapper.role = RoleType.Free;
+    spiritWrapper.task = 0;
     this.spiritIds.splice(this.spiritIds.indexOf(spiritWrapper.id), 1);
     this.totalSpiritCount--;
   }
@@ -38,7 +30,9 @@ export class SingleGroup extends SpiritGroup {
     const removedSpiritWrapper: Array<SpiritWrapper> = [];
 
     for (let i = 0; i < count && i < this.spiritIds.length; i++) {
-      removedSpiritWrapper.push(getSpiritWrapper(this.spiritIds[i]));
+      const spiritWrapper = getSpiritWrapper(this.spiritIds[i]);
+      removedSpiritWrapper.push(spiritWrapper);
+      this.removeSpirit(spiritWrapper);
     }
 
     return removedSpiritWrapper;

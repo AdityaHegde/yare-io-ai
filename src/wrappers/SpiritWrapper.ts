@@ -15,13 +15,13 @@ export class SpiritWrapper extends BaseWrapper<Spirit> {
   public targetId: string;
 
   public freshSpirit: boolean;
-  public energyExcess: number;
+  public entropy: number;
 
   constructor(entity: Spirit) {
     super(entity);
 
     this.freshSpirit = memory.spirits && !(entity.id in memory.spirits);
-    this.energyExcess = entity.energy;
+    this.entropy = entity.energy;
   }
 
   // Aliases
@@ -53,9 +53,25 @@ export class SpiritWrapper extends BaseWrapper<Spirit> {
     return false;
   }
 
-  // public getEnemyInRange(): Spirit {
-  //   return this.entity.sight.enemies.find(enenmy => enenmy.)
-  // }
+  public hasSpaceForEnergy(source: SpiritWrapper) {
+    return this.entropy + source.entity.size <= this.entity.energy_capacity;
+  }
+
+  public addPotentialEnergy(source: SpiritWrapper) {
+    this.entropy += source.entity.size;
+  }
+
+  public hasEntropy() {
+    return this.entropy >= 0;
+  }
+
+  public removePotentialEnergy(source: SpiritWrapper) {
+    this.entropy -= source.entity.size * 2;
+  }
+
+  public entropyIsAboveThreshold(threshold: number) {
+    return this.entropy / this.entity.energy_capacity >= threshold;
+  }
 
   // Misc
   public static getInstanceById(id: string): SpiritWrapper {

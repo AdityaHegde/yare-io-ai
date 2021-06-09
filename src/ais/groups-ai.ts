@@ -1,15 +1,3 @@
-import {initGlobals} from "../globals/initGlobals";
-import {initMemory} from "../globals/initMemory";
-import {GroupRunner} from "../runner/GroupRunner";
-import {GroupAssigner} from "../runner/assigner/GroupAssigner";
+import {getBasicGroupRunner} from "../runner/factory/groupRunnerFactory";
 
-initGlobals();
-
-const runner = new GroupRunner("one", new GroupAssigner("one"));
-
-if (!("tick" in memory)) {
-  initMemory();
-  runner.init();
-}
-
-runner.run();
+getBasicGroupRunner().run();

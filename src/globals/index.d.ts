@@ -49,6 +49,7 @@ declare const memory: {
   baseStar: string;
   started: boolean;
 
+  uniqueEnemies: Array<string>;
   lastSeenTick: number;
   underAttack: boolean;
 

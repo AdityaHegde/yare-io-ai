@@ -1,4 +1,4 @@
-import {ACTION_DISTANCE_SQUARED} from "../constants";
+import {ACTION_DISTANCE_SQUARED, REACHED_BUFFER} from "../constants";
 
 export function getDistance(lhs: Intractable, rhs: Intractable) {
   return getDistanceBetweenPos(lhs.position, rhs.position);
@@ -29,5 +29,6 @@ export function moveToPoint(sourcePos: Position, targetPos: Position, distance: 
 }
 
 export function atPosition(entity: Intractable, pos: Position) {
-  return entity.position[0] === pos[0] && entity.position[1] === pos[1];
+  return entity.position[0] >= pos[0] - REACHED_BUFFER && entity.position[0] <= pos[0] + REACHED_BUFFER &&
+    entity.position[1] >= pos[1] - REACHED_BUFFER && entity.position[1] <= pos[1] + REACHED_BUFFER;
 }

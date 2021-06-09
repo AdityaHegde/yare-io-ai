@@ -5,15 +5,15 @@ import {SpiritWrapper} from "../../wrappers/SpiritWrapper";
 import {isWithinRange} from "../../utils/GridUtils";
 
 export enum TaskType {
-  BasicCharge,
-  BasicStore,
-  BasicBaseDefend,
-  BasicBaseAttack,
+  Charge,
+  Store,
+  BaseDefend,
+  BaseAttack,
+  Rally,
 }
 
 export class Task<EntityType extends Intractable, WrapperType extends BaseWrapper<EntityType>> extends BaseClass {
   public type: TaskType;
-  public clearTarget = true;
 
   public targetPool: TargetPool<EntityType, WrapperType>;
 
@@ -24,41 +24,39 @@ export class Task<EntityType extends Intractable, WrapperType extends BaseWrappe
     targetPool: TargetPool<EntityType, WrapperType>,
   }) {
     super(id);
+    this.type = type;
     this.targetPool = targetPool;
   }
 
-  public processSpirit(spirit: SpiritWrapper): boolean {
+  public processSpirit(spiritWrapper: SpiritWrapper): boolean {
     let target;
 
-    if (!spirit.targetId) {
+    if (!spiritWrapper.targetId) {
       if (!this.targetPool.hasTargets()) {
         return true;
       }
 
       target = this.targetPool.getNextTarget();
-      spirit.targetId = target.entity.id;
+      spiritWrapper.targetId = target && target.entity && target.entity.id;
     } else {
-      target = this.targetPool.targets.get(spirit.targetId);
+      target = this.targetPool.targets.get(spiritWrapper.targetId);
     }
 
-    // this.logger.log(`spirit.targetId=${spirit.targetId} target.entity.id=${target?.entity?.id}`);
-
     if (!target) {
-      spirit.targetId = "";
+      spiritWrapper.targetId = "";
       return false;
     }
 
-    // this.logger.log(`source=${JSON.stringify(spirit.entity.position)} target=${JSON.stringify(target.entity.position)}`);
-    if (this.taskIsComplete(spirit, target)) {
+    if (this.taskIsComplete(spiritWrapper, target)) {
       return true;
     }
-    if (isWithinRange(spirit.entity, target.entity)) {
-      this.processSpiritCore(spirit, target);
+    if (isWithinRange(spiritWrapper.entity, target.entity)) {
+      this.processSpiritCore(spiritWrapper, target);
     } else {
-      spirit.move(target.entity.position);
+      spiritWrapper.move(target.entity.position);
     }
 
-    return this.taskIsComplete(spirit, target);
+    return this.taskIsComplete(spiritWrapper, target);
   }
 
   protected processSpiritCore(spirit: SpiritWrapper, target: WrapperType) {}
