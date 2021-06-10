@@ -6,12 +6,15 @@ import {SpiritWrapper} from "../wrappers/SpiritWrapper";
 import {Log} from "../utils/Logger";
 import {SlottedGroup} from "./SlottedGroup";
 import {PatrolArmy} from "./PatrolArmy";
-import {SpiritGroupType} from "./SpiritGroupType";
 import {findInArray} from "../utils/MathUtils";
+import {attackInRange} from "../utils/SpiritUtils";
 
 export type HarvestChainOpts = {
-  armySupportType: SpiritGroupType;
-  energyBuffer: number;
+  energyBufferMin: number;
+  energyBufferMax: number;
+  energyBufferScale: number;
+
+  armySupportGroup: PatrolArmy;
 }
 
 /**
@@ -30,16 +33,20 @@ export class HarvestChain extends SlottedGroup {
   // cursor to "this.spiritIdsBySlot" of spirit with energy capacity per slot
   public freeCursorBySlot: Array<number>;
 
-  private readonly armySupportType: SpiritGroupType;
+  private readonly armySupportGroup: PatrolArmy;
+
   private readonly energyBuffer: number;
 
   constructor(id: string, {
-    armySupportType,
-    energyBuffer,
+    energyBufferMin, energyBufferMax, energyBufferScale,
+    armySupportGroup,
   }: HarvestChainOpts) {
     super(id);
-    this.armySupportType = armySupportType;
-    this.energyBuffer = energyBuffer;
+    this.energyBuffer = Math.min(
+      energyBufferMax,
+      energyBufferMin + (energyBufferMax - energyBufferMin) * memory.tick * energyBufferScale,
+    );
+    this.armySupportGroup = armySupportGroup;
   }
 
   public run() {
@@ -120,19 +127,17 @@ export class HarvestChain extends SlottedGroup {
     if (!atPosition(spiritWrapper.entity, this.slots[slotIdx])) {
       spiritWrapper.move(this.slots[slotIdx]);
     }
+    // defend self
+    if (attackInRange(spiritWrapper)) {
+      return;
+    }
     const targetSpiritWrapper = this.assignTarget(spiritWrapper);
     this[forwardMethod](spiritWrapper, targetSpiritWrapper);
   }
 
   private supplyArmy(spiritWrapper: SpiritWrapper): boolean {
-    const armyGroup = globals.groups[this.armySupportType] as PatrolArmy;
-
-    if (!armyGroup) {
-      return false;
-    }
-
-    for (let i = 0; i < armyGroup.spiritIds.length; i++) {
-      const soldier = getSpiritWrapper(armyGroup.spiritIds[i]);
+    for (let i = 0; i < this.armySupportGroup.spiritIds.length; i++) {
+      const soldier = getSpiritWrapper(this.armySupportGroup.spiritIds[i]);
       if (isWithinRange(spiritWrapper.entity, soldier.entity) &&
         soldier.hasSpaceForEnergy(spiritWrapper) && soldier.entity.energy <= SOLDIER_ENERGY_THRESHOLD)  {
         // this.logger.log(`${spiritWrapper.id} supplying ${soldier.id} (${soldier.entropy})`);

@@ -13,71 +13,84 @@ import {RallyTask} from "../role/task/RallyTask";
 import {moveToPoint} from "../utils/GridUtils";
 import {RallyRole} from "../role/RallyRole";
 import {Log} from "../utils/Logger";
+import {TasksMapType} from "../role/task/TasksMapType";
+import {TargetPoolsMapType} from "../role/target/TargetPoolsMapType";
+import {RolesMapType} from "../role/RolesMapType";
+import {RoleAssigner} from "./assigner/RoleAssigner";
 
-type RoleRunnerConfig = {
+export type RoleRunnerConfig = {
   maxAttackers: number;
   maxDefenders: number;
 }
 
 @Log
 export class RoleRunner extends Runner<RoleRunnerConfig> {
+  protected targetPools: TargetPoolsMapType;
+  protected tasks: TasksMapType;
+  protected roles: RolesMapType;
+
   protected initCore() {
-    globals.targetPools = {
+    this.targetPools = {
       [TargetPoolType.Energy]: addInstanceToGlobal(new EnergyTargetPool(`${TargetPoolType.Energy}`)),
       [TargetPoolType.EnergyStorage]: addInstanceToGlobal(new EnergyStorageTargetPool(`${TargetPoolType.EnergyStorage}`)),
       [TargetPoolType.EnemyBase]: addInstanceToGlobal(new EnemyBaseTargetPool(`${TargetPoolType.EnemyBase}`)),
       [TargetPoolType.EnemySpirit]: addInstanceToGlobal(new EnemySpiritTargetPool(`${TargetPoolType.EnemySpirit}`)),
     };
 
-    globals.tasks = {
+    this.tasks = {
       [TaskType.Charge]: addInstanceToGlobal(new BasicChargeTask(`${TaskType.Charge}`, {
         type: TaskType.Charge,
-        targetPool: globals.targetPools[TargetPoolType.Energy],
+        targetPool: this.targetPools[TargetPoolType.Energy],
       })),
       [TaskType.Store]: addInstanceToGlobal(new BasicDischargeTask(`${TaskType.Store}`, {
         type: TaskType.Store,
-        targetPool: globals.targetPools[TargetPoolType.EnergyStorage],
+        targetPool: this.targetPools[TargetPoolType.EnergyStorage],
       })),
       [TaskType.BaseDefend]: addInstanceToGlobal(new BasicDischargeTask(`${TaskType.BaseDefend}`, {
         type: TaskType.BaseDefend,
-        targetPool: globals.targetPools[TargetPoolType.EnemySpirit] as any,
+        targetPool: this.targetPools[TargetPoolType.EnemySpirit] as any,
       })),
       [TaskType.Rally]: addInstanceToGlobal(new RallyTask(`${TaskType.Rally}`, {
         type: TaskType.Rally,
-        rallyPoint: moveToPoint(base.position, enemy_base.position, 50),
+        rallyPoint: moveToPoint(base.position, enemy_base.position, 250),
         attackInRange: false,
       })),
       [TaskType.BaseAttack]: addInstanceToGlobal(new RallyTask(`${TaskType.BaseAttack}`, {
         type: TaskType.Rally,
-        rallyPoint: moveToPoint(enemy_base.position, base.position, 50),
+        // rallyPoint: moveToPoint(enemy_base.position, base.position, 50),
+        rallyPoint: moveToPoint(enemy_base.position, (globals.enemyStar && globals.enemyStar.position) || [0, 0], 300),
         attackInRange: true,
       })),
     }
 
-    globals.roles = {
+    this.roles = {
       [RoleType.Harvester]: addInstanceToGlobal(new Role(`${RoleType.Harvester}`, {
         type: RoleType.Harvester,
-        tasks: [globals.tasks[TaskType.Charge], globals.tasks[TaskType.Store]],
+        tasks: [this.tasks[TaskType.Charge], this.tasks[TaskType.Store]],
         startFromScratch: false,
         maxSpirits: -1,
       })),
       [RoleType.Defender]: addInstanceToGlobal(new Role(`${RoleType.Defender}`, {
         type: RoleType.Defender,
-        tasks: [globals.tasks[TaskType.Charge], globals.tasks[TaskType.BaseDefend]],
+        tasks: [this.tasks[TaskType.Charge], this.tasks[TaskType.BaseDefend]],
         startFromScratch: false,
         maxSpirits: this.config.maxDefenders,
       })),
       [RoleType.Attacker]: addInstanceToGlobal(new RallyRole(`${RoleType.Attacker}`, {
         type: RoleType.Attacker,
-        tasks: [globals.tasks[TaskType.Rally], globals.tasks[TaskType.BaseAttack]],
+        tasks: [this.tasks[TaskType.Rally], this.tasks[TaskType.BaseAttack]],
         startFromScratch: true,
         maxSpirits: this.config.maxAttackers,
       })),
     };
+
+    Object.values(this.targetPools).forEach(targetPool => targetPool.updateTargets());
+
+    (this.assigner as RoleAssigner).roles = this.roles;
   }
 
   protected firstTimeInitCore() {
-    Object.values(globals.targetPools).forEach(targetPool => targetPool.init());
+    Object.values(this.targetPools).forEach(targetPool => targetPool.init());
   }
 
   protected runCore() {
@@ -87,7 +100,7 @@ export class RoleRunner extends Runner<RoleRunnerConfig> {
       if (spiritWrapper.entity.hp <= 0) {
         // this.logger.log(`${spiritWrapper.entity.id} has died.`);
         if (spiritWrapper.role) {
-          globals.roles[spiritWrapper.role].removeSpirit(spiritWrapper);
+          this.roles[spiritWrapper.role].removeSpirit(spiritWrapper);
         }
         spiritWrapper.destroy();
         return;
@@ -98,8 +111,8 @@ export class RoleRunner extends Runner<RoleRunnerConfig> {
         this.assigner.assign(spiritWrapper);
       }
 
-      if (spiritWrapper.role in globals.roles) {
-        globals.roles[spiritWrapper.role].processSpirit(spiritWrapper);
+      if (spiritWrapper.role in this.roles) {
+        this.roles[spiritWrapper.role].processSpirit(spiritWrapper);
       }
     }
   }

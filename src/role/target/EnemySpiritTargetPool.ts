@@ -1,8 +1,7 @@
 import {TargetPool, TargetPoolType} from "./TargetPool";
 import {SpiritWrapper} from "../../wrappers/SpiritWrapper";
-import {instanceSetInMemory} from "../../memory/instanceSetInMemory";
 import {MemorySet} from "../../memory/MemorySet";
-import {getInstance, getSpiritWrapper, getWrapperInstance} from "../../globals/globals";
+import {getSpiritWrapper} from "../../globals/globals";
 
 export class EnemySpiritTargetPool extends TargetPool<Spirit, SpiritWrapper> {
   public targets = new MemorySet<SpiritWrapper>(

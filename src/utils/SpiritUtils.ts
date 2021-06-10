@@ -28,10 +28,13 @@ export function attackInRange(spiritWrapper: SpiritWrapper, emitEnemies = false)
 
   if (!attacked && isWithinRange(spiritWrapper.entity, enemy_base)) {
     spiritWrapper.energize(enemy_base);
+    attacked = true;
   }
 
   if (emitEnemies && spiritWrapper.entity.sight.enemies.length > 0) {
     globals.enemySeen = true;
     spiritWrapper.entity.sight.enemies.forEach(enemyId => globals.uniqueEnemiesSeen.add(enemyId));
   }
+
+  return attacked;
 }

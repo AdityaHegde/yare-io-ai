@@ -1,29 +1,48 @@
-import {BlankRenderer, Game, GameRunner, LocalAIRunner, Logger, SpiritType, Yare} from "@adityahegde/yare-io-local";
-import {Player} from "@adityahegde/yare-io-local/dist/Player";
-import {getBasicGroupRunner} from "../../src/runner/factory/groupRunnerFactory";
-import {getBasicRoleRunner} from "../../src/runner/factory/roleRunnerFactory";
+import workerpool from "workerpool";
+import {RunResult} from "./types";
 
-const logger = new Logger("Test");
-const game = new Game([SpiritType.Circle, SpiritType.Circle]);
-const yare = new Yare(
-  game,
-  new GameRunner(game, [
-    new LocalAIRunner(() => {
-      getBasicGroupRunner().run();
-    }), new LocalAIRunner(() => {
-      getBasicRoleRunner().run();
-    }),
-  ]),
-  new BlankRenderer(game),
-  { runIntervalInMs: 5 },
-);
-function playerEndCondition(player: Player) {
-  return player.base.hp <= 0 || player.base.hasReachedMaxSpirits();
-}
-yare.init().then(async () => {
-  while(game.players.every(player => !playerEndCondition(player))) {
-    await yare.tick();
-  }
-  logger.log(`Final Tally.`);
-  game.players.forEach(player => logger.log(`SpiritCount=${player.spirits.length}`));
+const pool = workerpool.pool(__dirname + "/run-ais.js", {
+  // VM doest seem to work that well in threads
+  workerType: "process",
 });
+
+const results = {
+  0: {
+    winCount: 0,
+    maxSpiritCount: 0,
+    errorCount: 0,
+  },
+  1: {
+    winCount: 0,
+    maxSpiritCount: 0,
+    errorCount: 0,
+  }
+};
+let resultCount = 0;
+
+const promises = new Array<Promise<void>>();
+
+for (let i = 0; i < 50; i++) {
+  promises.push(pool.exec("run", []).then((result: RunResult) => {
+    resultCount++;
+    // console.log(result);
+
+    if (result.wonIdx >= 0) {
+      results[result.wonIdx].winCount++;
+    }
+    if (result.maxSpiritIdx >= 0) {
+      results[result.maxSpiritIdx].maxSpiritCount++;
+    }
+    if (result.errorIdx >= 0) {
+      results[result.errorIdx].errorCount++;
+    }
+  }));
+}
+
+(async () => {
+  await Promise.all(promises);
+
+  console.log(results[0], results[1]);
+
+  pool.terminate();
+})();

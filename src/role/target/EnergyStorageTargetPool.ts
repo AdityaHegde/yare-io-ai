@@ -1,6 +1,5 @@
 import {TargetPool, TargetPoolType} from "./TargetPool";
 import {StructureWrapper} from "../../wrappers/StructureWrapper";
-import {SpiritWrapper} from "../../wrappers/SpiritWrapper";
 import {instanceSetInMemory} from "../../memory/instanceSetInMemory";
 import {MemorySet} from "../../memory/MemorySet";
 

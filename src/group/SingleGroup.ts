@@ -20,17 +20,32 @@ export class SingleGroup extends SpiritGroup {
   }
 
   public removeSpirit(spiritWrapper: SpiritWrapper) {
-    spiritWrapper.role = RoleType.Free;
-    spiritWrapper.task = 0;
     this.spiritIds.splice(this.spiritIds.indexOf(spiritWrapper.id), 1);
     this.totalSpiritCount--;
+
+    spiritWrapper.role = RoleType.Free;
+    spiritWrapper.task = 0;
+  }
+
+  public removeMissingSpirit(spiritId: string) {
+    const idx = this.spiritIds.indexOf(spiritId);
+    if (idx >= 0) {
+      this.spiritIds.splice(idx, 1);
+      this.totalSpiritCount--;
+    }
   }
 
   public removeSpirits(count: number): Array<SpiritWrapper> {
     const removedSpiritWrapper: Array<SpiritWrapper> = [];
 
     for (let i = 0; i < count && i < this.spiritIds.length; i++) {
-      const spiritWrapper = getSpiritWrapper(this.spiritIds[i]);
+      const spiritId = this.spiritIds[i];
+
+      if (spirits[spiritId].hp <= 0) {
+        continue;
+      }
+
+      const spiritWrapper = getSpiritWrapper(spiritId);
       removedSpiritWrapper.push(spiritWrapper);
       this.removeSpirit(spiritWrapper);
     }

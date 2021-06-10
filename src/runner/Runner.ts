@@ -1,5 +1,4 @@
 import {BaseClass} from "../BaseClass";
-import {globals} from "../globals/globals";
 import {Assigner} from "./assigner/Assigner";
 import {initBaseStar, initGlobals} from "../globals/initGlobals";
 import {getDistance} from "../utils/GridUtils";
@@ -20,10 +19,7 @@ export abstract class Runner<ConfigType> extends BaseClass {
     memory.tick++;
 
     // this.logger.logJSON(memory);
-
-    for (const targetPool in globals.targetPools) {
-      globals.targetPools[targetPool].updateTargets();
-    }
+    this.logger.log(my_spirits.length, Object.keys(spirits).length - my_spirits.length);
 
     this.runCore();
   }

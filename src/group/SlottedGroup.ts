@@ -3,6 +3,7 @@ import {inMemory} from "../memory/inMemory";
 import {SpiritWrapper} from "../wrappers/SpiritWrapper";
 import {findInArray} from "../utils/MathUtils";
 import {RoleType} from "../role/Role";
+import {getSpiritWrapper} from "../globals/globals";
 
 /**
  * Abstraction for groups with different slots that can fit spirits
@@ -38,12 +39,47 @@ export class SlottedGroup extends SpiritGroup {
   }
 
   public removeSpirit(spiritWrapper: SpiritWrapper) {
-    spiritWrapper.role = RoleType.Free;
-    spiritWrapper.task = 0;
     this.spiritCountBySlot[spiritWrapper.task]--;
     this.totalSpiritCount--;
     const idx = this.spiritIdsBySlot[spiritWrapper.task].indexOf(spiritWrapper.id);
     this.spiritIdsBySlot[spiritWrapper.task].splice(idx, 1);
+
+    spiritWrapper.role = RoleType.Free;
+    spiritWrapper.task = 0;
+  }
+
+  public removeMissingSpirit(spiritId: string) {
+    for (let slotIdx = 0; slotIdx < this.spiritIdsBySlot.length; slotIdx++) {
+      const idx = this.spiritIdsBySlot[slotIdx].indexOf(spiritId);
+      if (idx >= 0) {
+        this.spiritIdsBySlot[slotIdx].splice(idx, 1);
+        break;
+      }
+    }
+  }
+
+  public removeSpirits(count: number): Array<SpiritWrapper> {
+    const removedSpiritWrapper: Array<SpiritWrapper> = [];
+
+    for (let i = 0, slotIdx = 0; i < count && i < this.totalSpiritCount; i++) {
+      const spiritId = this.spiritIdsBySlot[slotIdx][this.spiritIdsBySlot[slotIdx].length - 1];
+
+      if (spirits[spiritId].hp <= 0) {
+        continue;
+      }
+
+      const spiritWrapper = getSpiritWrapper(spiritId);
+      removedSpiritWrapper.push(spiritWrapper);
+      this.removeSpirit(spiritWrapper);
+
+      let newSlotIdx = (slotIdx + 1) % this.slots.length;
+      while (newSlotIdx !== slotIdx && this.spiritIdsBySlot[newSlotIdx].length === 0) {
+        newSlotIdx = (newSlotIdx + 1) % this.slots.length;
+      }
+      slotIdx = newSlotIdx;
+    }
+
+    return removedSpiritWrapper;
   }
 
   protected getSlots(): Array<Position> {
