@@ -2,7 +2,6 @@ import {Runner} from "./Runner";
 import {addInstanceToGlobal, getSpiritWrapper, globals} from "../globals/globals";
 import {RoleType} from "../role/Role";
 import {SpiritGroupType} from "../group/SpiritGroupType";
-import {InitialGroup} from "../group/InitialGroup";
 import {HarvestChain} from "../group/harvest-chain/HarvestChain";
 import {SentryLine} from "../group/SentryLine";
 import {PatrolArmy} from "../group/PatrolArmy";
@@ -10,6 +9,7 @@ import {PatrolPointsReference} from "../data/getPatrolPoints";
 import {Log} from "../utils/Logger";
 import {GroupsMapType} from "../group/GroupsMapType";
 import {GroupAssigner} from "./assigner/GroupAssigner";
+import {Harasser} from "../group/Harasser";
 
 export type GroupRunnerConfig = {
   harvestLinkBufferMin: number;
@@ -32,7 +32,6 @@ export class GroupRunner extends Runner<GroupRunnerConfig> {
     const baseDefenceArmy = addInstanceToGlobal(new PatrolArmy(`${SpiritGroupType.BaseDefenceArmy}`,
       {pointsReference: PatrolPointsReference.BaseDefence, emitEnemies: true}));
     this.groups = {
-      [SpiritGroupType.InitialGroup]: addInstanceToGlobal(new InitialGroup(`${SpiritGroupType.InitialGroup}`)),
       [SpiritGroupType.HarvestChain]: addInstanceToGlobal(new HarvestChain(`${SpiritGroupType.HarvestChain}`, {
         energyBufferMin: this.config.harvestLinkBufferMin, energyBufferMax: this.config.harvestLinkBufferMax,
         energyBufferScale: this.config.harvestLinkBufferScale,
@@ -46,6 +45,7 @@ export class GroupRunner extends Runner<GroupRunnerConfig> {
       [SpiritGroupType.BaseDefenceArmy]: baseDefenceArmy,
       [SpiritGroupType.BaseAttackArmy]: addInstanceToGlobal(new PatrolArmy(`${SpiritGroupType.BaseAttackArmy}`,
         {pointsReference: PatrolPointsReference.BaseAttack, emitEnemies: false})),
+      [SpiritGroupType.Harasser]: addInstanceToGlobal(new Harasser(`${SpiritGroupType.Harasser}`)),
     };
     (this.assigner as GroupAssigner).groups = this.groups;
   }

@@ -57,7 +57,6 @@ async function run() {
           {
             ...getBaseGroupRunnerConfig(),
             forceHarvesterNonHybrid: true,
-            harvesterHybridRatio: 2,
           },
         ).run();
       }),

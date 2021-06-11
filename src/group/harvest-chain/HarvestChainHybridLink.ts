@@ -28,7 +28,7 @@ export class HarvestChainHybridLink extends HarvestChainLink {
    * this.secondarySlot = smaller link
    */
   protected moveSpirit(spiritWrapper: SpiritWrapper) {
-    // console.log(spiritWrapper.id, spiritWrapper.task, spiritWrapper.entropy);
+    // console.log(spiritWrapper.id, spiritWrapper.subTask, spiritWrapper.entropy);
 
     const switchTaskConditions = [
       () => spiritWrapper.entropy <= this.moveOutThreshold * spiritWrapper.entity.size,
@@ -37,22 +37,22 @@ export class HarvestChainHybridLink extends HarvestChainLink {
       () => atPosition(spiritWrapper.entity, this.secondarySlot),
     ];
 
-    if (switchTaskConditions[spiritWrapper.task]()) {
-      spiritWrapper.task = (spiritWrapper.task + 1) % switchTaskConditions.length;
+    if (switchTaskConditions[spiritWrapper.subTask]()) {
+      spiritWrapper.subTask = (spiritWrapper.subTask + 1) % switchTaskConditions.length;
     }
 
     const moveToSlots = [
       this.secondarySlot, this.slot, this.slot, this.secondarySlot
     ];
 
-    if (!atPosition(spiritWrapper.entity, moveToSlots[spiritWrapper.task])) {
-      spiritWrapper.move(moveToSlots[spiritWrapper.task]);
+    if (!atPosition(spiritWrapper.entity, moveToSlots[spiritWrapper.subTask])) {
+      spiritWrapper.move(moveToSlots[spiritWrapper.subTask]);
     }
   }
 
   protected takeSpiritActionCore(spiritWrapper: SpiritWrapper, assignTarget: AssignTargetType) {
     let targetSpiritWrapper: SpiritWrapper;
-    switch (spiritWrapper.task) {
+    switch (spiritWrapper.subTask) {
       case 0:
         targetSpiritWrapper = assignTarget(spiritWrapper, this.moveOutThreshold === 0);
         break;
@@ -67,7 +67,7 @@ export class HarvestChainHybridLink extends HarvestChainLink {
         break;
     }
 
-    // console.log(spiritWrapper.id, spiritWrapper.task, targetSpiritWrapper && targetSpiritWrapper.id);
+    // console.log(spiritWrapper.id, spiritWrapper.subTask, targetSpiritWrapper && targetSpiritWrapper.id);
     if (targetSpiritWrapper) {
       spiritWrapper.energize(targetSpiritWrapper.entity);
       targetSpiritWrapper.addPotentialEnergy(spiritWrapper);

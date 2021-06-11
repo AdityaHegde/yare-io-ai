@@ -11,6 +11,9 @@ export class SpiritWrapper extends BaseWrapper<Spirit> {
   @inMemory(() => 0)
   public task: number;
 
+  @inMemory(() => 0)
+  public subTask: number;
+
   @inMemory(() => "")
   public targetId: string;
 

@@ -14,12 +14,19 @@ export function isWithinRange(lhs: Intractable, rhs: Intractable, dist = ACTION_
   return getDistance(lhs, rhs) <= dist;
 }
 
-export function moveToPoint(sourcePos: Position, targetPos: Position, distance: number): Position {
-  const angle = Math.atan2(targetPos[1] - sourcePos[1], targetPos[0] - sourcePos[0]);
+export function getAngleBetweenPos(sourcePos: Position, targetPos: Position): number {
+  return Math.atan2(targetPos[1] - sourcePos[1], targetPos[0] - sourcePos[0]);
+}
+
+export function moveAtAngle(sourcePos: Position, angle: number, distance: number): Position {
   return [
     sourcePos[0] + Math.round(Math.cos(angle) * distance),
     sourcePos[1] + Math.round(Math.sin(angle) * distance),
   ];
+}
+
+export function moveToPoint(sourcePos: Position, targetPos: Position, distance: number): Position {
+  return moveAtAngle(sourcePos, getAngleBetweenPos(sourcePos, targetPos), distance);
 }
 
 export function atPosition(entity: Intractable, pos: Position) {

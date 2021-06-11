@@ -15,7 +15,7 @@ location.search.replace(/^\?/, "").split("&").forEach((arg) => {
 });
 
 const playerOne = opts.one || "groups-ai";
-const playerTwo = opts.two || "groups-simple-ai";
+const playerTwo = opts.two || "roles-ai";
 
 const game = new Game([SpiritType.Circle, SpiritType.Circle]);
 const yare = new Yare(
@@ -25,7 +25,7 @@ const yare = new Yare(
     new IframeRunner(`http://localhost:8000/${playerTwo}.js`),
   ]),
   new BoardRenderer(game, div),
-  { runIntervalInMs: 25, pauseOnError: true },
+  { runIntervalInMs: 50, pauseOnError: true },
 );
 
 setTimeout(() => {

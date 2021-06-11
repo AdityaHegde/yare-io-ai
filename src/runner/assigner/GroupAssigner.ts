@@ -8,6 +8,7 @@ import {GroupsMapType} from "../../group/GroupsMapType";
 export type GroupAssignerConfig = {
   harvesterSentryRatio: number;
   harvesterDefenderRatio: number;
+  harvesterHarasserRatio: number;
 
   attackThreshold: number;
   attackerCount: number;
@@ -15,6 +16,7 @@ export type GroupAssignerConfig = {
   enableAttack?: boolean;
   enableSentry?: boolean;
   enableDefence?: boolean;
+  enableHarasser?: boolean;
 }
 
 @Log
@@ -27,20 +29,15 @@ export class GroupAssigner extends Assigner<GroupAssignerConfig> {
   }
 
   public assign(spiritWrapper: SpiritWrapper) {
-    // const initialGroup = this.groups[SpiritGroupType.InitialGroup];
     const harvesterGroup = this.groups[SpiritGroupType.HarvestChain];
     const sentryLine = this.groups[SpiritGroupType.SentryLine];
     const baseDefenceArmy = this.groups[SpiritGroupType.BaseDefenceArmy];
-
-    // if (spiritWrapper.freshSpirit) {
-    //   this.assignSpiritToGroup(spiritWrapper, initialGroup);
-    //   return;
-    // }
+    const harasser = this.groups[SpiritGroupType.Harasser];
 
     // sentry line would be killed if there is an attack
     // do not assign until attack has been cleared
-    if (this.config.enableSentry && !memory.underAttack &&
-        this.checkRatio(harvesterGroup, sentryLine, this.config.harvesterSentryRatio) && sentryLine.hasSpace()) {
+    if (this.config.enableSentry && !memory.underAttack && sentryLine.hasSpace() &&
+        this.checkRatio(harvesterGroup, sentryLine, this.config.harvesterSentryRatio)) {
       this.assignSpiritToGroup(spiritWrapper, sentryLine);
       return;
     }
@@ -48,6 +45,12 @@ export class GroupAssigner extends Assigner<GroupAssignerConfig> {
     if (this.config.enableDefence && memory.underAttack &&
         this.checkRatio(harvesterGroup, baseDefenceArmy, this.config.harvesterSentryRatio)) {
       this.assignSpiritToGroup(spiritWrapper, baseDefenceArmy);
+      return;
+    }
+
+    if (this.config.enableHarasser && harasser.hasSpace() &&
+        this.checkRatio(harvesterGroup, harasser, this.config.harvesterHarasserRatio)) {
+      this.assignSpiritToGroup(spiritWrapper, harasser);
       return;
     }
 

@@ -19,7 +19,7 @@ export abstract class Runner<ConfigType> extends BaseClass {
     memory.tick++;
 
     // this.logger.logJSON(memory);
-    // this.logger.log(my_spirits.length, Object.keys(spirits).length - my_spirits.length);
+    this.logger.log(my_spirits.length, Object.keys(spirits).length - my_spirits.length);
 
     this.runCore();
   }

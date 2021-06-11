@@ -22,6 +22,7 @@ export const SOLDIER_ENERGY_THRESHOLD = 5;
 // groups constants
 export const HARVESTER_SENTRY_RATIO = 10;
 export const HARVESTER_DEFENDER_RATIO = 3;
+export const HARASSER_DEFENDER_RATIO = 10;
 export const ATTACK_THRESHOLD = 150;
 export const ATTACKER_COUNT = 150;
 export const UNDER_ATTACK_BUFFER = 25;
@@ -31,5 +32,5 @@ export const HARVEST_LINK_BUFFER_SCALE = 0.0025;
 
 // roles constants
 export const HARVESTERS_THRESHOLD = 25;
-export const MAX_ATTACKERS = 10;
-export const MAX_DEFENDERS = 10;
+export const MAX_ATTACKERS = 1;
+export const MAX_DEFENDERS = 0;

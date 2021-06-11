@@ -1,10 +1,9 @@
 import {Log} from "../utils/Logger";
 import {atPosition, getDistance, moveToPoint} from "../utils/GridUtils";
-import {MAX_X, MAX_Y, SENTRY_COUNT, SENTRY_DISTANCE} from "../constants";
+import {MAX_X, MAX_Y} from "../constants";
 import {SlottedGroup} from "./SlottedGroup";
 import {getSpiritWrapper, globals} from "../globals/globals";
 
-@Log
 export class SentryLine extends SlottedGroup {
   private readonly sentryCount: number;
   private readonly sentryDistance: number;

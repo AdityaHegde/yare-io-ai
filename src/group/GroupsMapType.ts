@@ -1,13 +1,13 @@
 import {SpiritGroupType} from "./SpiritGroupType";
-import {InitialGroup} from "./InitialGroup";
 import {HarvestChain} from "./harvest-chain/HarvestChain";
 import {SentryLine} from "./SentryLine";
 import {PatrolArmy} from "./PatrolArmy";
+import {Harasser} from "./Harasser";
 
 export type GroupsMapType = {
-  [SpiritGroupType.InitialGroup]: InitialGroup,
   [SpiritGroupType.HarvestChain]: HarvestChain,
   [SpiritGroupType.SentryLine]: SentryLine,
   [SpiritGroupType.BaseDefenceArmy]: PatrolArmy,
   [SpiritGroupType.BaseAttackArmy]: PatrolArmy,
+  [SpiritGroupType.Harasser]: Harasser,
 }

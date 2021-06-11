@@ -33,7 +33,6 @@ const SPIRIT_COMPARE_SIZE = 10;
 /**
  * Forms a chain of spirits to drop off energy
  */
-@Log
 export class HarvestChain extends SlottedGroup {
   @inMemory(() => false)
   public isHybrid: boolean;
@@ -104,7 +103,7 @@ export class HarvestChain extends SlottedGroup {
     }
 
     this.secondarySlotSteps = Math.ceil(Math.sqrt(distToFinalStep) / MOVE_DISTANCE);
-    this.isHybrid = 2 * this.secondarySlotSteps <= SPIRIT_COMPARE_SIZE && !this.forceNonHybrid;
+    this.isHybrid = (2 * this.secondarySlotSteps <= SPIRIT_COMPARE_SIZE) && !this.forceNonHybrid;
 
     slots.push(finalStep);
 
@@ -114,10 +113,7 @@ export class HarvestChain extends SlottedGroup {
   protected getSpiritRatios(): Array<number> {
     return this.slots.map((_, idx) => {
       if (idx === 0) {
-        if (this.isHybrid) {
-          return 2 * (SPIRIT_COMPARE_SIZE + 2 * (this.secondarySlotSteps - 1));
-        }
-        return 2 * SPIRIT_COMPARE_SIZE;
+        return this.isHybrid ? 2 * (SPIRIT_COMPARE_SIZE + 2 * (this.secondarySlotSteps - 1)) : 2 * SPIRIT_COMPARE_SIZE;
       }
       if (idx === 1) {
         return this.isHybrid ? 0 : SPIRIT_COMPARE_SIZE;
