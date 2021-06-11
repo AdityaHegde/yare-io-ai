@@ -3,7 +3,7 @@ import {addInstanceToGlobal, getSpiritWrapper, globals} from "../globals/globals
 import {RoleType} from "../role/Role";
 import {SpiritGroupType} from "../group/SpiritGroupType";
 import {InitialGroup} from "../group/InitialGroup";
-import {HarvestChain} from "../group/HarvestChain";
+import {HarvestChain} from "../group/harvest-chain/HarvestChain";
 import {SentryLine} from "../group/SentryLine";
 import {PatrolArmy} from "../group/PatrolArmy";
 import {PatrolPointsReference} from "../data/getPatrolPoints";
@@ -20,6 +20,8 @@ export type GroupRunnerConfig = {
 
   sentryCount: number;
   sentryDistance: number;
+
+  forceHarvesterNonHybrid: boolean;
 }
 
 @Log
@@ -35,6 +37,8 @@ export class GroupRunner extends Runner<GroupRunnerConfig> {
         energyBufferMin: this.config.harvestLinkBufferMin, energyBufferMax: this.config.harvestLinkBufferMax,
         energyBufferScale: this.config.harvestLinkBufferScale,
         armySupportGroup: baseDefenceArmy,
+        starPosition: globals.baseStar.position, supplyPosition: base.position,
+        forceNonHybrid: this.config.forceHarvesterNonHybrid,
       })),
       [SpiritGroupType.SentryLine]: addInstanceToGlobal(new SentryLine(`${SpiritGroupType.SentryLine}`, {
         sentryCount: this.config.sentryCount, sentryDistance: this.config.sentryDistance,
@@ -51,9 +55,9 @@ export class GroupRunner extends Runner<GroupRunnerConfig> {
   }
 
   protected runCore() {
-    this.assigner.preTick();
+    Object.values(this.groups).forEach(group => group.filterDeadSpirits());
 
-    Object.values(this.groups).forEach(group => group.run());
+    this.assigner.preTick();
 
     my_spirits.forEach((spirit) => {
       if (spirit.hp <= 0) {
@@ -66,6 +70,8 @@ export class GroupRunner extends Runner<GroupRunnerConfig> {
         this.assigner.assign(spiritWrapper);
       }
     });
+
+    Object.values(this.groups).forEach(group => group.run());
 
     if (globals.enemySeen) {
       memory.underAttack = true;

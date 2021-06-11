@@ -11,14 +11,14 @@ export function getBaseGroupAssignerConfig(): GroupAssignerConfig {
   return {
     harvesterSentryRatio: HARVESTER_SENTRY_RATIO, harvesterDefenderRatio: HARVESTER_DEFENDER_RATIO,
     attackThreshold: ATTACK_THRESHOLD, attackerCount: ATTACKER_COUNT,
-    enableAttack: true, enableSentry: true, enableDefence: true,
+    enableAttack: true, enableSentry: false, enableDefence: true,
   };
 }
 
 export function getHarvesterOnlyGroupAssignerConfig(): GroupAssignerConfig {
   return {
     ...getBaseGroupAssignerConfig(),
-    enableAttack: false, enableSentry: false, enableDefence: false,
+    enableAttack: true, enableSentry: false, enableDefence: false,
   };
 }
 
@@ -29,6 +29,8 @@ export function getBaseGroupRunnerConfig(): GroupRunnerConfig {
 
     underAttackBuffer: UNDER_ATTACK_BUFFER,
     sentryCount: SENTRY_COUNT, sentryDistance: SENTRY_DISTANCE,
+
+    forceHarvesterNonHybrid: false,
   };
 }
 

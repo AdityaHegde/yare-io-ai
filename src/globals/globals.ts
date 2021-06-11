@@ -38,5 +38,8 @@ export function getWrapperInstance<EntityType extends Intractable>(
 }
 
 export function getSpiritWrapper(spiritId: string): SpiritWrapper {
+  if (globals.instances[SpiritWrapper.memoryName] && globals.instances[SpiritWrapper.memoryName][spiritId]) {
+    return globals.instances[SpiritWrapper.memoryName][spiritId] as SpiritWrapper;
+  }
   return getWrapperInstance(SpiritWrapper as any, spirits[spiritId]) as SpiritWrapper;
 }

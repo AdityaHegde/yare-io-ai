@@ -19,7 +19,7 @@ export abstract class Runner<ConfigType> extends BaseClass {
     memory.tick++;
 
     // this.logger.logJSON(memory);
-    this.logger.log(my_spirits.length, Object.keys(spirits).length - my_spirits.length);
+    // this.logger.log(my_spirits.length, Object.keys(spirits).length - my_spirits.length);
 
     this.runCore();
   }
@@ -29,18 +29,20 @@ export abstract class Runner<ConfigType> extends BaseClass {
     memory.ids = {};
     memory.baseStar = getDistance(base, star_a1c) > getDistance(base, star_zxq) ? "star_zxq" : "star_a1c";
     memory.uniqueEnemies = [];
-    initBaseStar();
-
-    this.firstTimeInitCore();
   }
 
   protected init() {
+    let firstTimeInit = !("tick" in memory);
+    if (firstTimeInit) {
+      this.firstTimeInit();
+    }
+
     initBaseStar();
     initGlobals();
-    this.initCore();
 
-    if (!("tick" in memory)) {
-      this.firstTimeInit();
+    this.initCore();
+    if (firstTimeInit) {
+      this.firstTimeInitCore();
     }
   }
 

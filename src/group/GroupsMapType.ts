@@ -1,6 +1,6 @@
 import {SpiritGroupType} from "./SpiritGroupType";
 import {InitialGroup} from "./InitialGroup";
-import {HarvestChain} from "./HarvestChain";
+import {HarvestChain} from "./harvest-chain/HarvestChain";
 import {SentryLine} from "./SentryLine";
 import {PatrolArmy} from "./PatrolArmy";
 

@@ -19,10 +19,14 @@ export class SlottedGroup extends SpiritGroup {
   @inMemory()
   public spiritIdsBySlot: Array<Array<string>>;
 
+  @inMemory()
+  public spiritRatios: Array<number>;
+
   public init() {
     this.slots = this.getSlots();
     this.spiritCountBySlot = this.slots.map(_ => 0);
     this.spiritIdsBySlot = this.slots.map(_ => []);
+    this.spiritRatios = this.getSpiritRatios();
   }
 
   public addSpirit(spiritWrapper: SpiritWrapper) {
@@ -64,10 +68,6 @@ export class SlottedGroup extends SpiritGroup {
     for (let i = 0, slotIdx = 0; i < count && i < this.totalSpiritCount; i++) {
       const spiritId = this.spiritIdsBySlot[slotIdx][this.spiritIdsBySlot[slotIdx].length - 1];
 
-      if (spirits[spiritId].hp <= 0) {
-        continue;
-      }
-
       const spiritWrapper = getSpiritWrapper(spiritId);
       removedSpiritWrapper.push(spiritWrapper);
       this.removeSpirit(spiritWrapper);
@@ -82,12 +82,23 @@ export class SlottedGroup extends SpiritGroup {
     return removedSpiritWrapper;
   }
 
+  public filterDeadSpirits() {
+    this.spiritIdsBySlot.forEach((spiritIdsInSlot) => {
+      spiritIdsInSlot.forEach(spiritId => this.checkAlive(spiritId));
+    });
+  }
+
   protected getSlots(): Array<Position> {
     return [];
   }
 
+  protected getSpiritRatios(): Array<number> {
+    return this.slots.map(_ => 1);
+  }
+
   protected getFreeSlot(): number {
-    const [, idx] = findInArray(this.spiritCountBySlot);
+    const [, idx] = findInArray(this.spiritCountBySlot,
+      (a: number, idx: number) => a / this.spiritRatios[idx]);
     return idx;
   }
 }

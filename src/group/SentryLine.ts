@@ -22,10 +22,6 @@ export class SentryLine extends SlottedGroup {
   public run() {
     let enemySighted = base.sight.enemies.length > 0;
 
-    this.spiritIdsBySlot.forEach((spiritIdsInSlot) => {
-      this.filterDeadSpirits(spiritIdsInSlot);
-    });
-
     this.spiritIdsBySlot.forEach((spiritIdsInSlot, slotIdx) => {
       spiritIdsInSlot.forEach((spiritId) => {
         const spiritWrapper = getSpiritWrapper(spiritId);

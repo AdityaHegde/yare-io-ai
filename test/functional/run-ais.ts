@@ -45,8 +45,6 @@ async function run() {
           ),
           {
             ...getBaseGroupRunnerConfig(),
-            harvestLinkBufferMin: HARVEST_LINK_BUFFER_MIN, harvestLinkBufferMax: HARVEST_LINK_BUFFER_MAX,
-            harvestLinkBufferScale: HARVEST_LINK_BUFFER_SCALE,
           },
         ).run();
       }), new LocalAIRunner(() => {
@@ -58,7 +56,8 @@ async function run() {
           ),
           {
             ...getBaseGroupRunnerConfig(),
-            harvestLinkBufferMin: 0.5, harvestLinkBufferMax: 0.5, harvestLinkBufferScale: 1,
+            forceHarvesterNonHybrid: true,
+            harvesterHybridRatio: 2,
           },
         ).run();
       }),

@@ -29,8 +29,6 @@ export class PatrolArmy extends SingleGroup {
   }
 
   public run() {
-    this.filterDeadSpirits(this.spiritIds);
-
     this.spiritIds.forEach((spiritId) => {
       const spiritWrapper = getSpiritWrapper(spiritId);
       this.moveSpirit(spiritWrapper);

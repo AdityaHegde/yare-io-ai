@@ -15,7 +15,7 @@ export function attackInRange(spiritWrapper: SpiritWrapper, emitEnemies = false)
     const enemyWrapper = getSpiritWrapper(enemyId);
     if (isWithinRange(spiritWrapper.entity, enemyWrapper.entity) && enemyWrapper.hasEntropy()) {
       spiritWrapper.energize(enemyWrapper.entity);
-      enemyWrapper.removePotentialEnergy(spiritWrapper);
+      enemyWrapper.removePotentialEnergy(spiritWrapper, true);
       attacked = true;
 
       if (!enemyWrapper.hasEntropy()) {

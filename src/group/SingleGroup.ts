@@ -41,10 +41,6 @@ export class SingleGroup extends SpiritGroup {
     for (let i = 0; i < count && i < this.spiritIds.length; i++) {
       const spiritId = this.spiritIds[i];
 
-      if (spirits[spiritId].hp <= 0) {
-        continue;
-      }
-
       const spiritWrapper = getSpiritWrapper(spiritId);
       removedSpiritWrapper.push(spiritWrapper);
       this.removeSpirit(spiritWrapper);
@@ -55,5 +51,9 @@ export class SingleGroup extends SpiritGroup {
 
   public hasSpace() {
     return this.maxSpirits !== -1 && this.totalSpiritCount < this.maxSpirits;
+  }
+
+  public filterDeadSpirits() {
+    this.spiritIds.forEach(spiritId => this.checkAlive(spiritId));
   }
 }

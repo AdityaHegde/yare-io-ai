@@ -1,4 +1,4 @@
-import {ACTION_DISTANCE_SQUARED, REACHED_BUFFER} from "../constants";
+import {ACTION_DISTANCE_SQUARED, GRID_NOISE} from "../constants";
 
 export function getDistance(lhs: Intractable, rhs: Intractable) {
   return getDistanceBetweenPos(lhs.position, rhs.position);
@@ -15,12 +15,6 @@ export function isWithinRange(lhs: Intractable, rhs: Intractable, dist = ACTION_
 }
 
 export function moveToPoint(sourcePos: Position, targetPos: Position, distance: number): Position {
-  // return target if it is closed than "distance"
-  const existingDistance = getDistanceBetweenPos(sourcePos, targetPos);
-  if (existingDistance < distance * distance) {
-    return targetPos;
-  }
-
   const angle = Math.atan2(targetPos[1] - sourcePos[1], targetPos[0] - sourcePos[0]);
   return [
     sourcePos[0] + Math.round(Math.cos(angle) * distance),
@@ -29,6 +23,6 @@ export function moveToPoint(sourcePos: Position, targetPos: Position, distance: 
 }
 
 export function atPosition(entity: Intractable, pos: Position) {
-  return entity.position[0] >= pos[0] - REACHED_BUFFER && entity.position[0] <= pos[0] + REACHED_BUFFER &&
-    entity.position[1] >= pos[1] - REACHED_BUFFER && entity.position[1] <= pos[1] + REACHED_BUFFER;
+  return entity.position[0] >= pos[0] - GRID_NOISE && entity.position[0] <= pos[0] + GRID_NOISE &&
+    entity.position[1] >= pos[1] - GRID_NOISE && entity.position[1] <= pos[1] + GRID_NOISE;
 }

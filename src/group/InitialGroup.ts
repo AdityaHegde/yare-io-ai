@@ -10,8 +10,6 @@ import {SingleGroup} from "./SingleGroup";
 @Log
 export class InitialGroup extends SingleGroup {
   public run() {
-    this.filterDeadSpirits(this.spiritIds);
-
     this.spiritIds.forEach((spiritId) => {
       const spiritWrapper = getSpiritWrapper(spiritId);
 

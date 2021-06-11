@@ -27,34 +27,26 @@ export class SpiritGroup extends BaseClass {
     return true;
   }
 
-  protected checkAlive(spiritWrapper: SpiritWrapper) {
-    if (!spiritWrapper.checkAlive()) {
-      this.removeSpirit(spiritWrapper);
+  public filterDeadSpirits() {}
+
+  protected checkAlive(spiritId: string) {
+    const spirit = spirits[spiritId];
+
+    if (!spirit) {
+      // this.logger.log(`Removed missing spirit. ${spiritId}`);
+      this.removeMissingSpirit(spiritId);
       return false;
     }
+
+    if (spirit.hp <= 0) {
+      // this.logger.log(`Removed dead spirit. ${spiritId}`);
+      const spiritWrapper = getSpiritWrapper(spiritId);
+      this.removeSpirit(spiritWrapper);
+      spiritWrapper.destroy();
+      return false;
+    }
+
     return true;
-  }
-
-  protected filterDeadSpirits(spiritIds: Array<string>) {
-    return spiritIds.filter((spiritId) => {
-      const spirit = spirits[spiritId];
-
-      if (!spirit) {
-        // this.logger.log(`Removed missing spirit. ${spiritId}`);
-        this.removeMissingSpirit(spiritId);
-        return false;
-      }
-
-      if (spirit.hp <= 0) {
-        // this.logger.log(`Removed dead spirit. ${spiritId}`);
-        const spiritWrapper = getSpiritWrapper(spiritId);
-        this.removeSpirit(spiritWrapper);
-        spiritWrapper.destroy();
-        return false;
-      }
-
-      return true;
-    });
   }
 
   protected mergeSpirits(spiritIds: Array<string>, mergeCount: number) {

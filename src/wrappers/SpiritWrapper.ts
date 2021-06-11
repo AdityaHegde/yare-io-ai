@@ -30,6 +30,9 @@ export class SpiritWrapper extends BaseWrapper<Spirit> {
   }
   public energize(target: Intractable) {
     this.entity.energize(target);
+    if (this.entity !== target) {
+      this.removePotentialEnergy(this);
+    }
   }
   public merge(target: Spirit) {
     this.entity.merge(target);
@@ -54,7 +57,7 @@ export class SpiritWrapper extends BaseWrapper<Spirit> {
   }
 
   public hasSpaceForEnergy(source: SpiritWrapper) {
-    return this.entropy + source.entity.size <= this.entity.energy_capacity;
+    return this.entropy + source.entity.size <= (this.entity.energy_capacity - this.entity.size);
   }
 
   public addPotentialEnergy(source: SpiritWrapper) {
@@ -65,8 +68,8 @@ export class SpiritWrapper extends BaseWrapper<Spirit> {
     return this.entropy >= 0;
   }
 
-  public removePotentialEnergy(source: SpiritWrapper) {
-    this.entropy -= source.entity.size * 2;
+  public removePotentialEnergy(source: SpiritWrapper, isAttack = false) {
+    this.entropy -= source.entity.size * (isAttack ? 2 : 1);
   }
 
   public entropyIsAboveThreshold(threshold: number) {
