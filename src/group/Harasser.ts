@@ -10,7 +10,10 @@ const MAINTAIN_DISTANCE_SQUARED = 300 * 300;
 
 export class Harasser extends SlottedGroup {
   @inMemory()
-  public harassSlot: Array<Position>;
+  public initialSlots: Array<Position>;
+
+  @inMemory()
+  public harassSlots: Array<Position>;
 
   public hasSpace(): boolean {
     return this.totalSpiritCount < this.slots.length;
@@ -18,17 +21,30 @@ export class Harasser extends SlottedGroup {
 
   protected getSlots(): Array<Position> {
     const slots = new Array<Position>();
+    const initialSlots = new Array<Position>();
     const harassSlots = new Array<Position>();
 
-    let angle = getAngleBetweenPos(enemy_base.position, globals.enemyStar.position) + Math.PI / 2;
+    let angle = getAngleBetweenPos(enemy_base.position, globals.enemyStar.position) + Math.PI * 3 / 4;
 
-    for (let i = 0; i < 5; i++) {
-      slots.push(moveAtAngle(enemy_base.position, angle, RALLY_DISTANCE));
-      harassSlots.push(moveAtAngle(enemy_base.position, angle, HARASS_DISTANCE))
-      angle += Math.PI / 4;
+    for (let i = 0; i < 2; i++) {
+      const slot = moveAtAngle(enemy_base.position, angle, RALLY_DISTANCE);
+      slots.push(slot);
+      initialSlots.push([base.position[0], slot[1]]);
+      harassSlots.push(moveAtAngle(enemy_base.position, angle, HARASS_DISTANCE));
+      angle += Math.PI / 2;
     }
 
-    this.harassSlot = harassSlots;
+    angle = getAngleBetweenPos(enemy_base.position, globals.enemyStar.position) + Math.PI / 4;
+
+    for (let i = 0; i < 2; i++) {
+      const slot = moveAtAngle(globals.enemyStar.position, angle, RALLY_DISTANCE);
+      slots.push(slot);
+      initialSlots.push([slot[0], base.position[1]]);
+      harassSlots.push(moveAtAngle(globals.enemyStar.position, angle, HARASS_DISTANCE));
+      angle -= Math.PI / 2;
+    }
+
+    this.harassSlots = harassSlots;
 
     return slots;
   }
@@ -46,7 +62,7 @@ export class Harasser extends SlottedGroup {
         }
 
         const subTaskToPos = [
-          initialPos, slotPos, this.harassSlot[slotIdx],
+          initialPos, slotPos, this.harassSlots[slotIdx],
         ];
 
         if (!atPosition(spiritWrapper.entity, subTaskToPos[spiritWrapper.subTask])) {

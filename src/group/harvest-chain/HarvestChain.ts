@@ -38,6 +38,9 @@ export class HarvestChain extends SlottedGroup {
   public isHybrid: boolean;
 
   @inMemory()
+  public finalStep: Position;
+
+  @inMemory()
   // steps to secondary slot
   public secondarySlotSteps: number;
 
@@ -102,10 +105,14 @@ export class HarvestChain extends SlottedGroup {
       distToFinalStep = getDistanceBetweenPos(step, finalStep);
     }
 
-    this.secondarySlotSteps = Math.ceil(Math.sqrt(distToFinalStep) / MOVE_DISTANCE);
+    this.secondarySlotSteps = Math.ceil(Math.sqrt(distToFinalStep) / MOVE_DISTANCE) - 1;
     this.isHybrid = (2 * this.secondarySlotSteps <= SPIRIT_COMPARE_SIZE) && !this.forceNonHybrid;
 
-    slots.push(finalStep);
+    if (!this.isHybrid) {
+      slots.push(finalStep);
+    } else {
+      this.finalStep = finalStep;
+    }
 
     return slots.reverse();
   }
@@ -113,10 +120,7 @@ export class HarvestChain extends SlottedGroup {
   protected getSpiritRatios(): Array<number> {
     return this.slots.map((_, idx) => {
       if (idx === 0) {
-        return this.isHybrid ? 2 * (SPIRIT_COMPARE_SIZE + 2 * (this.secondarySlotSteps - 1)) : 2 * SPIRIT_COMPARE_SIZE;
-      }
-      if (idx === 1) {
-        return this.isHybrid ? 0 : SPIRIT_COMPARE_SIZE;
+        return this.isHybrid ? 2 * (SPIRIT_COMPARE_SIZE + 2 * this.secondarySlotSteps) : 2 * SPIRIT_COMPARE_SIZE;
       }
       return SPIRIT_COMPARE_SIZE;
     });
@@ -135,8 +139,7 @@ export class HarvestChain extends SlottedGroup {
       if (idx === 0) {
         return this.isHybrid ?
           new HarvestChainHybridLink(opts, {
-            secondarySlot: this.slots[1],
-            moveOutThreshold: 0,
+            secondarySlot: this.finalStep,
           }):
           new HarvestChainStarLink(opts);
       }

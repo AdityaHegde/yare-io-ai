@@ -26,7 +26,7 @@ export function getBaseGroupAssignerConfig(): GroupAssignerConfig {
 export function getHarvesterOnlyGroupAssignerConfig(): GroupAssignerConfig {
   return {
     ...getBaseGroupAssignerConfig(),
-    enableAttack: true, enableSentry: false, enableDefence: false, enableHarasser: false,
+    enableAttack: false, enableSentry: false, enableDefence: false, enableHarasser: false,
   };
 }
 
@@ -38,7 +38,7 @@ export function getBaseGroupRunnerConfig(): GroupRunnerConfig {
     underAttackBuffer: UNDER_ATTACK_BUFFER,
     sentryCount: SENTRY_COUNT, sentryDistance: SENTRY_DISTANCE,
 
-    forceHarvesterNonHybrid: true,
+    forceHarvesterNonHybrid: false,
   };
 }
 

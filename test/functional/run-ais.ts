@@ -1,16 +1,13 @@
 import workerpool from "workerpool";
 import {BlankRenderer, Game, GameRunner, LocalAIRunner, SpiritType, Yare} from "@adityahegde/yare-io-local";
 import {
-  getBaseGroupAssignerConfig,
   getBaseGroupRunnerConfig,
-  getBasicGroupRunner, getHarvesterOnlyGroupAssignerConfig
+  getHarvesterOnlyGroupAssignerConfig
 } from "../../src/runner/factory/groupRunnerFactory";
-import {getBasicRoleRunner} from "../../src/runner/factory/roleRunnerFactory";
 import {Player} from "@adityahegde/yare-io-local/dist/Player";
 import {RunResult} from "./types";
 import {GroupRunner} from "../../src/runner/GroupRunner";
 import {GroupAssigner} from "../../src/runner/assigner/GroupAssigner";
-import {HARVEST_LINK_BUFFER_MAX, HARVEST_LINK_BUFFER_MIN, HARVEST_LINK_BUFFER_SCALE} from "../../src/constants";
 
 const MAX_TICK_COUNT = 2000;
 function playerEndCondition(player: Player) {
@@ -18,6 +15,8 @@ function playerEndCondition(player: Player) {
 }
 
 function getResult(game: Game, yare: Yare): RunResult {
+  console.log(game.players[0].spirits.length, game.players[1].spirits.length);
+
   const result: RunResult = {
     wonIdx: game.players[0].base.hp <= 0 ? 1 : (game.players[1].base.hp <= 0 ? 0 : -1),
     maxSpiritIdx: game.players[0].spirits.length > game.players[1].spirits.length ? 0 : 1,
@@ -43,11 +42,10 @@ async function run() {
             "one",
             getHarvesterOnlyGroupAssignerConfig(),
           ),
-          {
-            ...getBaseGroupRunnerConfig(),
-          },
+          getBaseGroupRunnerConfig(),
         ).run();
-      }), new LocalAIRunner(() => {
+      }),
+      new LocalAIRunner(() => {
         new GroupRunner(
           "two",
           new GroupAssigner(

@@ -22,7 +22,7 @@ let resultCount = 0;
 
 const promises = new Array<Promise<void>>();
 
-for (let i = 0; i < 50; i++) {
+for (let i = 0; i < 5; i++) {
   promises.push(pool.exec("run", []).then((result: RunResult) => {
     resultCount++;
     // console.log(result);
