@@ -2,7 +2,6 @@ import {SpiritWrapper} from "../wrappers/SpiritWrapper";
 import {getSpiritWrapper, globals} from "../globals/globals";
 import {getAngleBetweenPos, getDistance, isWithinRange, moveAtAngle} from "./GridUtils";
 import {findInArray} from "./MathUtils";
-import {Position} from "@adityahegde/yare-io-local/dist/globals/gameTypes";
 import {MOVE_DISTANCE} from "../constants";
 
 export function attackInRange(spiritWrapper: SpiritWrapper, emitEnemies = false) {
@@ -15,7 +14,7 @@ export function attackInRange(spiritWrapper: SpiritWrapper, emitEnemies = false)
       continue;
     }
 
-    const enemyWrapper = getSpiritWrapper(enemyId);
+    const enemyWrapper = getSpiritWrapper(enemyId).setIsFriendly(false);
     if (isWithinRange(spiritWrapper.entity, enemyWrapper.entity) && enemyWrapper.hasEntropy()) {
       spiritWrapper.energize(enemyWrapper.entity);
       enemyWrapper.removePotentialEnergy(spiritWrapper, true);
@@ -64,4 +63,19 @@ export function getClosestSpirit(spiritWrapper: SpiritWrapper, spiritIds: Array<
     spiritIds.map(spiritId => getSpiritWrapper(spiritId)),
     spiritWrapper => getDistance(spiritWrapper.entity, spiritWrapper.entity),
   );
+}
+
+export function supplyArmy(spiritWrapper: SpiritWrapper): boolean {
+  for (const army of globals.armies) {
+    for (const spiritId of army.spiritIds) {
+      const soldier = getSpiritWrapper(spiritId);
+      if (soldier.hasSpaceForEnergy(spiritWrapper) && isWithinRange(spiritWrapper.entity, soldier.entity))  {
+        soldier.addPotentialEnergy(spiritWrapper);
+        spiritWrapper.energize(soldier.entity);
+        return true;
+      }
+    }
+  }
+
+  return false;
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import {Game, GameRunner, SpiritType, Yare} from "@adityahegde/yare-io-local";
+import {Game, GameRunner, MapData, MapGenerator, SpiritType, Yare} from "@adityahegde/yare-io-local";
 import {SideBar} from "@adityahegde/yare-io-local/dist/react-components"
 import {BoardRenderer} from "@adityahegde/yare-io-local/dist/renderer/graphics";
 import {IframeRunner} from "@adityahegde/yare-io-local/dist/runner/IframeRunner";
@@ -15,7 +15,7 @@ location.search.replace(/^\?/, "").split("&").forEach((arg) => {
 });
 
 const playerOne = opts.one || "groups-ai";
-const playerTwo = opts.two || "roles-ai";
+const playerTwo = opts.two || "groups-ai-simple";
 
 const game = new Game([SpiritType.Circle, SpiritType.Circle]);
 const yare = new Yare(
@@ -25,6 +25,7 @@ const yare = new Yare(
     new IframeRunner(`http://localhost:8000/${playerTwo}.js`),
   ]),
   new BoardRenderer(game, div),
+  new MapGenerator(MapData.getBasicMapData()),
   { runIntervalInMs: 50, pauseOnError: true },
 );
 

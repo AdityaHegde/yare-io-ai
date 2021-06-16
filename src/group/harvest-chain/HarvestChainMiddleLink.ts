@@ -5,9 +5,12 @@ export class HarvestChainMiddleLink extends HarvestChainLink {
   protected takeSpiritActionCore(spiritWrapper: SpiritWrapper, assignTarget: AssignTargetType) {
     const targetSpiritWrapper = assignTarget(spiritWrapper);
 
-    if (spiritWrapper.entropyIsAboveThreshold(this.energyBuffer) && targetSpiritWrapper) {
-      spiritWrapper.energize(targetSpiritWrapper.entity);
-      targetSpiritWrapper.addPotentialEnergy(spiritWrapper);
+    if (!spiritWrapper.entropyIsAboveThreshold(this.energyBuffer) || !targetSpiritWrapper) {
+      return false;
     }
+
+    spiritWrapper.energize(targetSpiritWrapper.entity);
+    targetSpiritWrapper.addPotentialEnergy(spiritWrapper);
+    return true;
   }
 }

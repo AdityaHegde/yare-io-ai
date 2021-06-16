@@ -1,7 +1,9 @@
 export enum SpiritGroupType {
-  HarvestChain,
+  Harvester,
+  MidStarHarvester,
   SentryLine,
   BaseDefenceArmy,
   BaseAttackArmy,
   Harasser,
+  EnemyArmy,
 }

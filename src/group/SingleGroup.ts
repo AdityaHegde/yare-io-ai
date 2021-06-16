@@ -1,6 +1,5 @@
 import {inMemory} from "../memory/inMemory";
 import {SpiritWrapper} from "../wrappers/SpiritWrapper";
-import {RoleType} from "../role/Role";
 import {SpiritGroup} from "./SpiritGroup";
 import {getSpiritWrapper} from "../globals/globals";
 
@@ -14,7 +13,6 @@ export class SingleGroup extends SpiritGroup {
   public maxSpirits: number;
 
   public addSpirit(spiritWrapper: SpiritWrapper) {
-    spiritWrapper.role = RoleType.Group;
     this.spiritIds.push(spiritWrapper.id);
     this.totalSpiritCount++;
   }
@@ -23,7 +21,6 @@ export class SingleGroup extends SpiritGroup {
     this.spiritIds.splice(this.spiritIds.indexOf(spiritWrapper.id), 1);
     this.totalSpiritCount--;
 
-    spiritWrapper.role = RoleType.Free;
     spiritWrapper.task = 0;
   }
 

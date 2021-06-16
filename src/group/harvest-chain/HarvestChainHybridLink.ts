@@ -28,9 +28,9 @@ export class HarvestChainHybridLink extends HarvestChainLink {
     // console.log(spiritWrapper.id, spiritWrapper.subTask, spiritWrapper.entropy);
 
     const switchTaskConditions = [
-      () => spiritWrapper.entropy < 0,
+      () => !spiritWrapper.hasEntropy(),
       () => atPosition(spiritWrapper.entity, this.secondarySlot),
-      () => spiritWrapper.entropy === spiritWrapper.entity.energy_capacity,
+      () => spiritWrapper.isEntropyFull(),
       () => atPosition(spiritWrapper.entity, this.slot),
     ];
 
@@ -56,12 +56,16 @@ export class HarvestChainHybridLink extends HarvestChainLink {
       case 2:
         targetSpiritWrapper = spiritWrapper;
         break;
+      default: return true;
     }
 
     // console.log(spiritWrapper.id, spiritWrapper.subTask, targetSpiritWrapper && targetSpiritWrapper.id);
-    if (targetSpiritWrapper) {
-      spiritWrapper.energize(targetSpiritWrapper.entity);
-      targetSpiritWrapper.addPotentialEnergy(spiritWrapper);
+    if (!targetSpiritWrapper) {
+      return false;
     }
+
+    spiritWrapper.energize(targetSpiritWrapper.entity);
+    targetSpiritWrapper.addPotentialEnergy(spiritWrapper);
+    return true;
   }
 }

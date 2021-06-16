@@ -24,6 +24,7 @@ function getOutputOptions(file) {
     format: "cjs",
     intro: "(() => {",
     outro: "})()",
+    sourcemap: true,
   };
 }
 

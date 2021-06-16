@@ -2,7 +2,6 @@ import {SpiritGroup} from "./SpiritGroup";
 import {inMemory} from "../memory/inMemory";
 import {SpiritWrapper} from "../wrappers/SpiritWrapper";
 import {findInArray} from "../utils/MathUtils";
-import {RoleType} from "../role/Role";
 import {getSpiritWrapper} from "../globals/globals";
 
 /**
@@ -35,7 +34,6 @@ export class SlottedGroup extends SpiritGroup {
       return;
     }
 
-    spiritWrapper.role = RoleType.Group;
     spiritWrapper.task = idx;
     this.spiritCountBySlot[idx]++;
     this.totalSpiritCount++;
@@ -48,7 +46,6 @@ export class SlottedGroup extends SpiritGroup {
     const idx = this.spiritIdsBySlot[spiritWrapper.task].indexOf(spiritWrapper.id);
     this.spiritIdsBySlot[spiritWrapper.task].splice(idx, 1);
 
-    spiritWrapper.role = RoleType.Free;
     spiritWrapper.task = 0;
   }
 
@@ -65,18 +62,13 @@ export class SlottedGroup extends SpiritGroup {
   public removeSpirits(count: number): Array<SpiritWrapper> {
     const removedSpiritWrapper: Array<SpiritWrapper> = [];
 
-    for (let i = 0, slotIdx = 0; i < count && i < this.totalSpiritCount; i++) {
+    for (let i = 0; i < count && i < this.totalSpiritCount; i++) {
+      const slotIdx = this.getFreeSlot(true);
       const spiritId = this.spiritIdsBySlot[slotIdx][this.spiritIdsBySlot[slotIdx].length - 1];
 
       const spiritWrapper = getSpiritWrapper(spiritId);
       removedSpiritWrapper.push(spiritWrapper);
       this.removeSpirit(spiritWrapper);
-
-      let newSlotIdx = (slotIdx + 1) % this.slots.length;
-      while (newSlotIdx !== slotIdx && this.spiritIdsBySlot[newSlotIdx].length === 0) {
-        newSlotIdx = (newSlotIdx + 1) % this.slots.length;
-      }
-      slotIdx = newSlotIdx;
     }
 
     return removedSpiritWrapper;
@@ -96,9 +88,10 @@ export class SlottedGroup extends SpiritGroup {
     return this.slots.map(_ => 1);
   }
 
-  protected getFreeSlot(): number {
+  protected getFreeSlot(largest?: boolean): number {
     const [, idx] = findInArray(this.spiritCountBySlot,
-      (a: number, idx: number) => a / this.spiritRatios[idx]);
+      (a: number, idx: number) => a / this.spiritRatios[idx],
+      largest ? (a, b) => b - a : (a, b) => a - b);
     return idx;
   }
 }

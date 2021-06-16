@@ -1,5 +1,5 @@
-import {GroupRunner, GroupRunnerConfig} from "../GroupRunner";
-import {GroupAssigner, GroupAssignerConfig} from "../assigner/GroupAssigner";
+import {GroupRunner, GroupRunnerConfig} from "./GroupRunner";
+import {GroupAssigner, GroupAssignerConfig} from "./assigner/GroupAssigner";
 import {
   ATTACK_THRESHOLD,
   ATTACKER_COUNT,
@@ -12,21 +12,22 @@ import {
   SENTRY_COUNT,
   SENTRY_DISTANCE,
   UNDER_ATTACK_BUFFER
-} from "../../constants";
+} from "../constants";
 
 export function getBaseGroupAssignerConfig(): GroupAssignerConfig {
   return {
     harvesterSentryRatio: HARVESTER_SENTRY_RATIO, harvesterDefenderRatio: HARVESTER_DEFENDER_RATIO,
     harvesterHarasserRatio: HARASSER_DEFENDER_RATIO,
     attackThreshold: ATTACK_THRESHOLD, attackerCount: ATTACKER_COUNT,
-    enableAttack: true, enableSentry: false, enableDefence: true, enableHarasser: true,
+    enableAttack: true, enableSentry: false, enableDefence: true, enableHarasser: false,
+    enableMiddleHarvesting: true,
   };
 }
 
 export function getHarvesterOnlyGroupAssignerConfig(): GroupAssignerConfig {
   return {
     ...getBaseGroupAssignerConfig(),
-    enableAttack: false, enableSentry: false, enableDefence: false, enableHarasser: false,
+    enableAttack: false, enableDefence: false, enableHarasser: false,
   };
 }
 
@@ -37,8 +38,6 @@ export function getBaseGroupRunnerConfig(): GroupRunnerConfig {
 
     underAttackBuffer: UNDER_ATTACK_BUFFER,
     sentryCount: SENTRY_COUNT, sentryDistance: SENTRY_DISTANCE,
-
-    forceHarvesterNonHybrid: false,
   };
 }
 

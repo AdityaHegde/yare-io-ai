@@ -1,3 +1,3 @@
-import {getBasicGroupRunner} from "../runner/factory/groupRunnerFactory";
+import {getBasicGroupRunner} from "../runner/groupRunnerFactory";
 
 getBasicGroupRunner().run();

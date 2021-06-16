@@ -1,4 +1,5 @@
 import {moveToPoint} from "../utils/GridUtils";
+import {globals} from "../globals/globals";
 
 export enum PatrolPointsReference {
   BaseDefence,
@@ -29,5 +30,8 @@ function getBaseDefencePoints() {
 }
 
 function getBaseAttackPoints() {
-  return [enemy_base.position];
+  return [
+    moveToPoint(base.position, globals.baseStar.position, 300),
+    moveToPoint(enemy_base.position, globals.enemyStar.position, 300),
+  ];
 }

@@ -3,30 +3,25 @@ import {getSpiritWrapper} from "../../globals/globals";
 import {
   ACTION_DISTANCE,
   ACTION_DISTANCE_SQUARED,
-  MOVE_DISTANCE,
+  MOVE_DISTANCE, STAR_CONSTANT_REGEN, STAR_MAX_ENERGY, STAR_PERCENT_REGEN,
 } from "../../constants";
 import {getDistanceBetweenPos, moveToPoint} from "../../utils/GridUtils";
 import {SpiritWrapper} from "../../wrappers/SpiritWrapper";
-import {Log} from "../../utils/Logger";
 import {SlottedGroup} from "../SlottedGroup";
-import {PatrolArmy} from "../PatrolArmy";
 import {Position} from "@adityahegde/yare-io-local/dist/globals/gameTypes";
 import {HarvestChainHybridLink} from "./HarvestChainHybridLink";
 import {HarvestChainLink, HarvestChainLinkOpts} from "./HarvestChainLink";
 import {HarvestChainStarLink} from "./HarvestChainStarLink";
 import {HarvestChainMiddleLink} from "./HarvestChainMiddleLink";
+import {HarvestChainSupplyLink} from "./HarvestChainSupplyLink";
 
 export type HarvestChainOpts = {
   energyBufferMin: number;
   energyBufferMax: number;
   energyBufferScale: number;
 
-  armySupportGroup: PatrolArmy;
-
-  starPosition: Position;
-  supplyPosition: Position;
-
-  forceNonHybrid: boolean;
+  star: Energy;
+  supply: EnergySupply;
 }
 const SPIRIT_COMPARE_SIZE = 10;
 
@@ -50,19 +45,13 @@ export class HarvestChain extends SlottedGroup {
   // configs
   private readonly energyBuffer: number;
 
-  private readonly armySupportGroup: PatrolArmy;
-
-  private readonly starPosition: Position;
-  private readonly supplyPosition: Position;
-
-  private readonly forceNonHybrid: boolean;
+  private readonly star: Energy;
+  private readonly supply: EnergySupply;
   // configs end
 
   constructor(id: string, {
     energyBufferMin, energyBufferMax, energyBufferScale,
-    armySupportGroup,
-    starPosition, supplyPosition,
-    forceNonHybrid,
+    star, supply,
   }: HarvestChainOpts) {
     super(id);
 
@@ -71,12 +60,8 @@ export class HarvestChain extends SlottedGroup {
       energyBufferMin + (energyBufferMax - energyBufferMin) * memory.tick * energyBufferScale,
     );
 
-    this.armySupportGroup = armySupportGroup;
-
-    this.starPosition = starPosition;
-    this.supplyPosition = supplyPosition;
-
-    this.forceNonHybrid = forceNonHybrid;
+    this.star = star;
+    this.supply = supply;
   }
 
   public run() {
@@ -86,16 +71,31 @@ export class HarvestChain extends SlottedGroup {
 
     for (let slotIdx = this.slots.length - 1; slotIdx >= 0; slotIdx--) {
       this.spiritIdsBySlot[slotIdx].forEach(spiritId => links[slotIdx].processSpirit(spiritId,
-        (spiritWrapper, skipLink) => this.assignTarget(spiritWrapper, slotIdx, skipLink)))
+        (spiritWrapper) => this.assignTarget(spiritWrapper, slotIdx)))
     }
+  }
+
+  public hasSpace() {
+    if (this.star.energy === 0) {
+      return false;
+    }
+
+    const starRegen = STAR_CONSTANT_REGEN + Math.floor(this.star.energy * STAR_PERCENT_REGEN);
+    const maxDepositors = STAR_CONSTANT_REGEN + Math.floor(this.star.energy * STAR_PERCENT_REGEN /
+      ((this.star.energy + starRegen) >= STAR_MAX_ENERGY ? 1 : 2));
+    const depositorRatio = this.spiritRatios[this.spiritRatios.length - 1];
+    const maxSpirits = Math.floor(this.spiritRatios.reduce((spiritCount, ratio) =>
+      spiritCount + ratio * maxDepositors / depositorRatio, 0));
+
+    return this.totalSpiritCount < maxSpirits;
   }
 
   protected getSlots(): Array<Position> {
     const slots = new Array<Position>();
 
-    const finalStep = moveToPoint(this.starPosition, this.supplyPosition, ACTION_DISTANCE);
+    const finalStep = moveToPoint(this.star.position, this.supply.position, ACTION_DISTANCE);
 
-    let step = this.supplyPosition;
+    let step = this.supply.position;
     let distToFinalStep = getDistanceBetweenPos(step, finalStep);
 
     while (distToFinalStep >= ACTION_DISTANCE_SQUARED) {
@@ -106,7 +106,7 @@ export class HarvestChain extends SlottedGroup {
     }
 
     this.secondarySlotSteps = Math.ceil(Math.sqrt(distToFinalStep) / MOVE_DISTANCE) - 1;
-    this.isHybrid = (2 * this.secondarySlotSteps <= SPIRIT_COMPARE_SIZE) && !this.forceNonHybrid;
+    this.isHybrid = (2 * this.secondarySlotSteps) <= SPIRIT_COMPARE_SIZE;
 
     if (!this.isHybrid) {
       slots.push(finalStep);
@@ -120,7 +120,7 @@ export class HarvestChain extends SlottedGroup {
   protected getSpiritRatios(): Array<number> {
     return this.slots.map((_, idx) => {
       if (idx === 0) {
-        return this.isHybrid ? 2 * (SPIRIT_COMPARE_SIZE + 2 * this.secondarySlotSteps) : 2 * SPIRIT_COMPARE_SIZE;
+        return 2 * SPIRIT_COMPARE_SIZE + (this.isHybrid ? 2 * this.secondarySlotSteps : 0);
       }
       return SPIRIT_COMPARE_SIZE;
     });
@@ -131,10 +131,9 @@ export class HarvestChain extends SlottedGroup {
       const opts: HarvestChainLinkOpts = {
         slot,
         energyBuffer: this.energyBuffer,
-        armySupportGroup: this.armySupportGroup,
       };
       if (idx === this.slots.length - 1) {
-        return new HarvestChainLink(opts);
+        return new HarvestChainSupplyLink(opts, this.supply);
       }
       if (idx === 0) {
         return this.isHybrid ?
@@ -147,8 +146,8 @@ export class HarvestChain extends SlottedGroup {
     });
   }
 
-  private assignTarget(spiritWrapper: SpiritWrapper, slotIdx: number, skipLink?: boolean): SpiritWrapper {
-    const nextLink = slotIdx + (skipLink ? 2 : 1);
+  private assignTarget(spiritWrapper: SpiritWrapper, slotIdx: number): SpiritWrapper {
+    const nextLink = slotIdx + 1;
     // last link wont have any targets
     if (nextLink >= this.slots.length || this.spiritIdsBySlot[nextLink].length === 0) {
       return null;

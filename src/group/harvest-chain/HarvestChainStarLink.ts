@@ -6,12 +6,13 @@ export class HarvestChainStarLink extends HarvestChainLink {
     if (spiritWrapper.entropyIsAboveThreshold(this.energyBuffer)) {
       const targetSpiritWrapper = assignTarget(spiritWrapper);
       if (!targetSpiritWrapper) {
-        return;
+        return false;
       }
       spiritWrapper.energize(targetSpiritWrapper.entity);
       targetSpiritWrapper.addPotentialEnergy(spiritWrapper);
     } else {
       spiritWrapper.energize(spiritWrapper.entity);
     }
+    return true;
   }
 }

@@ -1,6 +1,8 @@
 import {BaseClass} from "../BaseClass";
 import {BaseWrapper} from "../wrappers/BaseWrapper";
 import {SpiritWrapper} from "../wrappers/SpiritWrapper";
+import {PatrolArmy} from "../group/PatrolArmy";
+import {EnemyArmy} from "../group/EnemyArmy";
 
 export const globals: {
   baseStar?: Energy;
@@ -10,6 +12,9 @@ export const globals: {
   enemySeen?: boolean;
 
   enemiesTargeted?: Set<string>;
+
+  armies?: Array<PatrolArmy>;
+  enemyArmies?: Array<EnemyArmy>;
 
   instances?: Record<string, Record<string, BaseClass>>;
 } = {};

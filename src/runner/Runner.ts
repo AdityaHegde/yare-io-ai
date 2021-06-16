@@ -1,11 +1,15 @@
 import {BaseClass} from "../BaseClass";
 import {Assigner} from "./assigner/Assigner";
-import {initBaseStar, initGlobals} from "../globals/initGlobals";
+import {initGlobals} from "../globals/initGlobals";
 import {getDistance} from "../utils/GridUtils";
+import {getSpiritWrapper} from "../globals/globals";
+import {EnemyArmyDetection} from "../enemy/EnemyArmyDetection";
 
 export abstract class Runner<ConfigType> extends BaseClass {
   protected readonly assigner: Assigner<any>;
   protected readonly config: ConfigType;
+
+  // protected enemyArmyDetection: EnemyArmyDetection;
 
   constructor(id: string, assigner: Assigner<any>, config: ConfigType) {
     super(id);
@@ -14,13 +18,18 @@ export abstract class Runner<ConfigType> extends BaseClass {
   }
 
   public run() {
+    // console.log(JSON.stringify(memory));
+    // console.log(my_spirits.length, Object.keys(spirits).length - my_spirits.length);
+    // console.log(memory.tick, star_zxq.energy, star_a1c.energy, star_p89.energy);
+
     this.init();
 
     memory.tick++;
 
-    // this.logger.logJSON(memory);
-    this.logger.log(my_spirits.length, Object.keys(spirits).length - my_spirits.length);
+    // mark all my_spirits as friendly
+    my_spirits.forEach(spirit => getSpiritWrapper(spirit.id).setIsFriendly(true));
 
+    // this.enemyArmyDetection.run();
     this.runCore();
   }
 
@@ -37,12 +46,12 @@ export abstract class Runner<ConfigType> extends BaseClass {
       this.firstTimeInit();
     }
 
-    initBaseStar();
     initGlobals();
 
     this.initCore();
     if (firstTimeInit) {
       this.firstTimeInitCore();
+      // this.enemyArmyDetection.init();
     }
   }
 

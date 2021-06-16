@@ -1,4 +1,5 @@
 import {
+  getBaseGroupAssignerConfig,
   getBaseGroupRunnerConfig,
   getHarvesterOnlyGroupAssignerConfig
 } from "../runner/groupRunnerFactory";
@@ -9,7 +10,10 @@ new GroupRunner(
   "one",
   new GroupAssigner(
     "one",
-    getHarvesterOnlyGroupAssignerConfig(),
+    {
+      ...getBaseGroupAssignerConfig(),
+      enableMiddleHarvesting: false, enableHarasser: false, enableAttack: false,
+    },
   ),
   getBaseGroupRunnerConfig(),
 ).run();

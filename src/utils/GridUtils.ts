@@ -33,3 +33,10 @@ export function atPosition(entity: Intractable, pos: Position) {
   return entity.position[0] >= pos[0] - GRID_NOISE && entity.position[0] <= pos[0] + GRID_NOISE &&
     entity.position[1] >= pos[1] - GRID_NOISE && entity.position[1] <= pos[1] + GRID_NOISE;
 }
+
+export function getPointSign(posA: Position, posB: Position, sourcePos: Position) {
+  return Math.sign(
+    (posB[0] - posA[0]) * (sourcePos[1] - posA[1]) -
+    (posB[1] - posA[1]) * (sourcePos[0] - posA[0])
+  );
+}

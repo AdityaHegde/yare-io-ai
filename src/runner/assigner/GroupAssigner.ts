@@ -17,9 +17,9 @@ export type GroupAssignerConfig = {
   enableSentry?: boolean;
   enableDefence?: boolean;
   enableHarasser?: boolean;
+  enableMiddleHarvesting?: boolean;
 }
 
-@Log
 export class GroupAssigner extends Assigner<GroupAssignerConfig> {
   public groups: GroupsMapType;
 
@@ -29,22 +29,18 @@ export class GroupAssigner extends Assigner<GroupAssignerConfig> {
   }
 
   public assign(spiritWrapper: SpiritWrapper) {
-    const harvesterGroup = this.groups[SpiritGroupType.HarvestChain];
-    const sentryLine = this.groups[SpiritGroupType.SentryLine];
-    const baseDefenceArmy = this.groups[SpiritGroupType.BaseDefenceArmy];
+    const harvesterGroup = this.groups[SpiritGroupType.Harvester];
+    const midStarHarvesterGroup = this.groups[SpiritGroupType.MidStarHarvester];
     const harasser = this.groups[SpiritGroupType.Harasser];
+    const baseAttack = this.groups[SpiritGroupType.BaseAttackArmy];
 
-    // sentry line would be killed if there is an attack
-    // do not assign until attack has been cleared
-    if (this.config.enableSentry && !memory.underAttack && sentryLine.hasSpace() &&
-        this.checkRatio(harvesterGroup, sentryLine, this.config.harvesterSentryRatio)) {
-      this.assignSpiritToGroup(spiritWrapper, sentryLine);
+    if (harvesterGroup.hasSpace()) {
+      this.assignSpiritToGroup(spiritWrapper, harvesterGroup);
       return;
     }
 
-    if (this.config.enableDefence && memory.underAttack &&
-        this.checkRatio(harvesterGroup, baseDefenceArmy, this.config.harvesterSentryRatio)) {
-      this.assignSpiritToGroup(spiritWrapper, baseDefenceArmy);
+    if (this.config.enableMiddleHarvesting && midStarHarvesterGroup.hasSpace()) {
+      this.assignSpiritToGroup(spiritWrapper, midStarHarvesterGroup);
       return;
     }
 
@@ -54,7 +50,10 @@ export class GroupAssigner extends Assigner<GroupAssignerConfig> {
       return;
     }
 
-    this.assignSpiritToGroup(spiritWrapper, harvesterGroup);
+    if (this.config.enableAttack && baseAttack.hasSpace()) {
+      this.assignSpiritToGroup(spiritWrapper, baseAttack);
+      return;
+    }
   }
 
   public postTick() {
@@ -62,7 +61,7 @@ export class GroupAssigner extends Assigner<GroupAssignerConfig> {
   }
 
   private assignSpiritToGroup(spiritWrapper: SpiritWrapper, selectedGroup: SpiritGroup) {
-    // this.logger.log(`${spiritWrapper.id} assigned to ${selectedGroup.id}`);
+    // console.log(`${spiritWrapper.id} assigned to ${selectedGroup.id}`);
     selectedGroup.addSpirit(spiritWrapper);
   }
 
@@ -73,9 +72,9 @@ export class GroupAssigner extends Assigner<GroupAssignerConfig> {
     }
 
     this.reassignFromGroup(
-      this.groups[SpiritGroupType.HarvestChain],
+      this.groups[SpiritGroupType.Harvester],
       this.groups[SpiritGroupType.BaseDefenceArmy],
-      Math.min(memory.uniqueEnemies.length * 1.25, this.groups[SpiritGroupType.HarvestChain].totalSpiritCount),
+      Math.min(memory.uniqueEnemies.length * 1.25, this.groups[SpiritGroupType.Harvester].totalSpiritCount),
     );
   }
 
@@ -86,23 +85,23 @@ export class GroupAssigner extends Assigner<GroupAssignerConfig> {
 
     this.reassignFromGroup(
       this.groups[SpiritGroupType.BaseDefenceArmy],
-      this.groups[SpiritGroupType.HarvestChain],
+      this.groups[SpiritGroupType.Harvester],
       this.groups[SpiritGroupType.BaseDefenceArmy].totalSpiritCount,
     );
   }
 
   private reassignToAttack() {
     if (!this.config.enableAttack ||
-        this.groups[SpiritGroupType.HarvestChain].totalSpiritCount < this.config.attackThreshold) {
+        this.groups[SpiritGroupType.Harvester].totalSpiritCount < this.config.attackThreshold) {
       return;
     }
 
-    // this.logger.log(`Reassigning to attack`);
+    // console.log(`Reassigning to attack`);
 
     this.reassignFromGroup(
-      this.groups[SpiritGroupType.HarvestChain],
+      this.groups[SpiritGroupType.Harvester],
       this.groups[SpiritGroupType.BaseAttackArmy],
-      Math.min(this.groups[SpiritGroupType.HarvestChain].totalSpiritCount, this.config.attackerCount),
+      Math.min(this.groups[SpiritGroupType.Harvester].totalSpiritCount, this.config.attackerCount),
     );
   }
 

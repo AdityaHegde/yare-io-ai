@@ -1,4 +1,5 @@
 import {globals} from "./globals";
+import {PatrolArmy} from "../group/PatrolArmy";
 
 export function initGlobals() {
   globals.uniqueEnemiesSeen = new Set(memory.uniqueEnemies || []);
@@ -6,7 +7,11 @@ export function initGlobals() {
 
   globals.enemiesTargeted = new Set();
 
+  globals.armies = new Array<PatrolArmy>();
+
   globals.instances = {};
+
+  initBaseStar();
 }
 
 export function initBaseStar() {

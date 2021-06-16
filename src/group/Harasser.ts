@@ -1,5 +1,5 @@
 import {SlottedGroup} from "./SlottedGroup";
-import {atPosition, getAngleBetweenPos, getDistance, moveAtAngle} from "../utils/GridUtils";
+import {atPosition, getAngleBetweenPos, moveAtAngle} from "../utils/GridUtils";
 import {getSpiritWrapper, globals} from "../globals/globals";
 import {avoidEnemy} from "../utils/SpiritUtils";
 import {inMemory} from "../memory/inMemory";
@@ -24,8 +24,8 @@ export class Harasser extends SlottedGroup {
     const initialSlots = new Array<Position>();
     const harassSlots = new Array<Position>();
 
+    // base harass slots
     let angle = getAngleBetweenPos(enemy_base.position, globals.enemyStar.position) + Math.PI * 3 / 4;
-
     for (let i = 0; i < 2; i++) {
       const slot = moveAtAngle(enemy_base.position, angle, RALLY_DISTANCE);
       slots.push(slot);
@@ -34,17 +34,18 @@ export class Harasser extends SlottedGroup {
       angle += Math.PI / 2;
     }
 
-    angle = getAngleBetweenPos(enemy_base.position, globals.enemyStar.position) + Math.PI / 4;
-
-    for (let i = 0; i < 2; i++) {
-      const slot = moveAtAngle(globals.enemyStar.position, angle, RALLY_DISTANCE);
-      slots.push(slot);
-      initialSlots.push([slot[0], base.position[1]]);
-      harassSlots.push(moveAtAngle(globals.enemyStar.position, angle, HARASS_DISTANCE));
-      angle -= Math.PI / 2;
-    }
+    // star harass slots
+    // angle = getAngleBetweenPos(enemy_base.position, globals.enemyStar.position) + Math.PI / 4;
+    // for (let i = 0; i < 2; i++) {
+    //   const slot = moveAtAngle(globals.enemyStar.position, angle, RALLY_DISTANCE);
+    //   slots.push(slot);
+    //   initialSlots.push([slot[0], base.position[1]]);
+    //   harassSlots.push(moveAtAngle(globals.enemyStar.position, angle, HARASS_DISTANCE));
+    //   angle -= Math.PI / 2;
+    // }
 
     this.harassSlots = harassSlots;
+    this.initialSlots = initialSlots;
 
     return slots;
   }
@@ -55,14 +56,13 @@ export class Harasser extends SlottedGroup {
         const spiritWrapper = getSpiritWrapper(spiritId);
 
         const slotPos = this.slots[slotIdx];
-        const initialPos: Position = [base.position[0], slotPos[1]];
 
         if (avoidEnemy(spiritWrapper, MAINTAIN_DISTANCE_SQUARED)) {
           return;
         }
 
         const subTaskToPos = [
-          initialPos, slotPos, this.harassSlots[slotIdx],
+          this.initialSlots[slotIdx], slotPos, this.harassSlots[slotIdx],
         ];
 
         if (!atPosition(spiritWrapper.entity, subTaskToPos[spiritWrapper.subTask])) {

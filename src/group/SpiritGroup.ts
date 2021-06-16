@@ -33,13 +33,13 @@ export class SpiritGroup extends BaseClass {
     const spirit = spirits[spiritId];
 
     if (!spirit) {
-      // this.logger.log(`Removed missing spirit. ${spiritId}`);
+      // console.log(`Removed missing spirit. ${spiritId}`);
       this.removeMissingSpirit(spiritId);
       return false;
     }
 
     if (spirit.hp <= 0) {
-      // this.logger.log(`Removed dead spirit. ${spiritId}`);
+      // console.log(`Removed dead spirit. ${spiritId}`);
       const spiritWrapper = getSpiritWrapper(spiritId);
       this.removeSpirit(spiritWrapper);
       spiritWrapper.destroy();

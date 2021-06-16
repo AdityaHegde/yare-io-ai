@@ -15,7 +15,7 @@
   "author": "adityahegderocks@gmail.com",
   "license": "ISC",
   "devDependencies": {
-    "@adityahegde/yare-io-local": "^0.1.4",
+    "@adityahegde/yare-io-local": "^0.3.0",
     "@rollup/stream": "^2.0.0",
     "@types/mocha": "^8.2.2",
     "@types/node": "^14.17.2",

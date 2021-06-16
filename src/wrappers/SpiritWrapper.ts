@@ -1,13 +1,9 @@
 import {BaseWrapper} from "./BaseWrapper";
 import {Memory} from "../memory/Memory";
 import {inMemory} from "../memory/inMemory";
-import {RoleType} from "../role/Role";
 
 @Memory("spirits")
 export class SpiritWrapper extends BaseWrapper<Spirit> {
-  @inMemory(() => RoleType.Free)
-  public role: RoleType;
-
   @inMemory(() => 0)
   public task: number;
 
@@ -17,14 +13,23 @@ export class SpiritWrapper extends BaseWrapper<Spirit> {
   @inMemory(() => "")
   public targetId: string;
 
+  @inMemory(() => null)
+  public previousPos: Position;
+  @inMemory(() => null)
+  public previousAngle: number;
+  public currentAngle: number;
+
   public freshSpirit: boolean;
   public entropy: number;
+
+  public isFriendly: boolean;
 
   constructor(entity: Spirit) {
     super(entity);
 
-    this.freshSpirit = memory.spirits && !(entity.id in memory.spirits);
-    this.entropy = entity.energy;
+    this.freshSpirit = !memory.spirits || !(entity.id in memory.spirits);
+    // we need to go through enemy's hp. hence adding 1 to entropy
+    this.entropy = entity.energy + (this.isFriendly ? 0 : 1);
   }
 
   // Aliases
@@ -43,22 +48,11 @@ export class SpiritWrapper extends BaseWrapper<Spirit> {
   public divide() {
     this.entity.divide();
   }
-  public isFull() {
-    return this.entity.energy === this.entity.energy_capacity;
-  }
-  public isEmpty() {
-    return this.entity.energy <= 0;
+  public shout(message: string) {
+    this.entity.shout(message);
   }
 
   // Operations
-  public checkAlive(): boolean {
-    if (this.entity.hp > 0) {
-      return true;
-    }
-    this.destroy();
-    return false;
-  }
-
   public hasSpaceForEnergy(source: SpiritWrapper) {
     return this.entropy + source.entity.size <= (this.entity.energy_capacity - this.entity.size);
   }
@@ -68,7 +62,7 @@ export class SpiritWrapper extends BaseWrapper<Spirit> {
   }
 
   public hasEntropy() {
-    return this.entropy >= 0;
+    return this.entropy > 0;
   }
 
   public removePotentialEnergy(source: SpiritWrapper, isAttack = false) {
@@ -79,7 +73,20 @@ export class SpiritWrapper extends BaseWrapper<Spirit> {
     return this.entropy / this.entity.energy_capacity >= threshold;
   }
 
+  public isEntropyFull() {
+    return this.entropy === this.entity.energy_capacity;
+  }
+
   // Misc
+  public setIsFriendly(isFriendly: boolean): SpiritWrapper {
+    this.isFriendly = isFriendly;
+    if (this.isFriendly === undefined && !isFriendly) {
+      // assume enemies will attack
+      this.entropy -= this.entity.size;
+    }
+    return this;
+  }
+
   public static getInstanceById(id: string): SpiritWrapper {
     return new this(spirits[id]);
   }
